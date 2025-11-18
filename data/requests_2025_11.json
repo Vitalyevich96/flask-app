@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "client_id": "0fd33149-f029-4b37-9c31-412a03d425b1",
+    "name": "Alexandr Gussev",
+    "email": "vitalyevich96@gmail.com",
+    "phone": "+7 (708) 535-26-46",
+    "service_type": "audit",
+    "company_type": "Физлицо",
+    "message": "2131231",
+    "urgency": "standard",
+    "date": "10.11.2025 16:39:15",
+    "status": "новая",
+    "assigned_to": "",
+    "notes": ""
+  }
+]

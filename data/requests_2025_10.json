@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "client_id": "0fd33149-f029-4b37-9c31-412a03d425b1",
+    "name": "Alexandr Gussev",
+    "email": "vitalyevich96@gmail.com",
+    "phone": "+7 (708) 535-26-46",
+    "service_type": "reporting",
+    "company_type": "ИП",
+    "message": "Сдать форму 123У",
+    "urgency": "urgent",
+    "date": "23.10.2025 12:09:22",
+    "status": "завершена",
+    "assigned_to": "",
+    "notes": ""
+  },
+  {
+    "id": 2,
+    "client_id": "0fd33149-f029-4b37-9c31-412a03d425b1",
+    "name": "Alexandr Gussev",
+    "email": "vitalyevich96@gmail.com",
+    "phone": "+7 (708) 535-26-46",
+    "service_type": "bookkeeping",
+    "company_type": "ТОО",
+    "message": "sdskvcksdvcjascacaoscoaschsasjcoiasjcossoiash o n от oisoisdn oisdin sidn iosdndoisn sidon sidn n выщ sdon dsn oisn oisdn iosdn odsn osn osn osdn odsin oisdn osdn osdn osdn osd osdnoinaopsicnidvn dpoinsonoip nspionsspps s",
+    "urgency": "very_urgent",
+    "date": "23.10.2025 13:49:42",
+    "status": "завершена",
+    "assigned_to": "",
+    "notes": ""
+  },
+  {
+    "id": 3,
+    "client_id": "0fd33149-f029-4b37-9c31-412a03d425b1",
+    "name": "Alexandr Gussev",
+    "email": "vitalyevich96@gmail.com",
+    "phone": "+7 (708) 535-26-46",
+    "service_type": "bookkeeping",
+    "company_type": "ИП",
+    "message": "asdas",
+    "urgency": "standard",
+    "date": "23.10.2025 13:51:41",
+    "status": "в_процессе",
+    "assigned_to": "",
+    "notes": ""
+  },
+  {
+    "id": 4,
+    "client_id": "0fd33149-f029-4b37-9c31-412a03d425b1",
+    "name": "Alexandr Gussev",
+    "email": "vitalyevich96@gmail.com",
+    "phone": "+7 (708) 535-26-46",
+    "service_type": "registration",
+    "company_type": "ТОО",
+    "message": "asdasfdsvds",
+    "urgency": "standard",
+    "date": "23.10.2025 13:51:53",
+    "status": "новая",
+    "assigned_to": "",
+    "notes": ""
+  }
+]

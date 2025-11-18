@@ -1,0 +1,163 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Administrator\\Documents\\project\\accountant\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\vercel.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:vercel.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\app.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:app.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\requirements.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:requirements.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\consultation.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:templates\\consultation.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\admin.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:templates\\admin.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:templates\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\base.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:templates\\base.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\login.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7E643ADD-18E2-45B3-8E22-A595536DCF95}|accountant.pyproj|solutionrelative:templates\\login.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Documents\\project\\alfa\\accountant\\templates\\admin_clients.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "vercel.json",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\vercel.json",
+              "RelativeDocumentMoniker": "vercel.json",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\vercel.json",
+              "RelativeToolTip": "vercel.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-18T10:53:24.157Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "requirements.txt",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\requirements.txt",
+              "RelativeDocumentMoniker": "requirements.txt",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\requirements.txt",
+              "RelativeToolTip": "requirements.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-11-18T09:32:42.411Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "consultation.html",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\consultation.html",
+              "RelativeDocumentMoniker": "templates\\consultation.html",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\consultation.html",
+              "RelativeToolTip": "templates\\consultation.html",
+              "ViewState": "AgIAAFoBAAAAAAAAAAAAwIgBAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-11-18T09:17:03.667Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "admin_clients.html",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\alfa\\accountant\\templates\\admin_clients.html",
+              "RelativeDocumentMoniker": "..\\alfa\\accountant\\templates\\admin_clients.html",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\alfa\\accountant\\templates\\admin_clients.html",
+              "RelativeToolTip": "..\\alfa\\accountant\\templates\\admin_clients.html",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-10-22T04:25:37.794Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "login.html",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\login.html",
+              "RelativeDocumentMoniker": "templates\\login.html",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\login.html",
+              "RelativeToolTip": "templates\\login.html",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAiwHMAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-10-23T05:03:06.565Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "admin.html",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\admin.html",
+              "RelativeDocumentMoniker": "templates\\admin.html",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\admin.html",
+              "RelativeToolTip": "templates\\admin.html",
+              "ViewState": "AgIAAMwBAAAAAAAAAAAAwPoBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-10-23T05:01:35.915Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "app.py",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\app.py",
+              "RelativeDocumentMoniker": "app.py",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\app.py",
+              "RelativeToolTip": "app.py",
+              "ViewState": "AgIAAFkBAAAAAAAAAAAAAIABAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-17T03:01:10.971Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "base.html",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\base.html",
+              "RelativeDocumentMoniker": "templates\\base.html",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\base.html",
+              "RelativeToolTip": "templates\\base.html",
+              "ViewState": "AgIAAOgAAAAAAAAAAAAAwMsBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-10-17T03:02:36.977Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "index.html",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\index.html",
+              "RelativeDocumentMoniker": "templates\\index.html",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\project\\accountant\\templates\\index.html",
+              "RelativeToolTip": "templates\\index.html",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAAwGEAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-10-17T03:03:01.864Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

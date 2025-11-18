@@ -1,0 +1,20 @@
+[
+  {
+    "id": "0f4e94a1-67d8-4d44-94d2-9626b871f4d8",
+    "name": "Alexandr Gussev",
+    "email": "legionary0211@yandex.com",
+    "phone": "87085352646",
+    "company_type": "ИП",
+    "created_date": "21.10.2025 01:30:42",
+    "requests_count": 1
+  },
+  {
+    "id": "0fd33149-f029-4b37-9c31-412a03d425b1",
+    "name": "Alexandr Gussev",
+    "email": "vitalyevich96@gmail.com",
+    "phone": "+7 (708) 777-66-55",
+    "company_type": "",
+    "created_date": "23.10.2025 11:39:43",
+    "requests_count": 9
+  }
+]

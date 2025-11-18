@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /logout
+Disallow: /api/
+
+# SEO directives
+Crawl-delay: 1
+Clean-param: ref
+
+Sitemap: https://buhgalter-aktobe.onrender.com/sitemap.xml

@@ -1,0 +1,1751 @@
+{% extends "base.html" %}
+
+{% block title %}Бухгалтер - Гусева Юлия{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* COMMON ELEMENTS */
+
+    h1, h2, h3, h4 {
+        color: #007bff;
+        font-weight: 600;
+    }
+
+    section {
+        margin: 80px 0;
+        scroll-margin-top: 80px;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, #007bff 0%, #00b8a9 100%);
+        color: white;
+        padding: 120px 24px;
+        text-align: center;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,123,255,0.3);
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent 70%);
+            z-index: 0;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+    .hero-points {
+        margin: 30px auto;
+        list-style: none;
+        padding: 0;
+        font-size: 1.1em;
+        line-height: 1.8;
+    }
+
+        .hero-points li {
+            opacity: 0.9;
+        }
+
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-30px) rotate(180deg);
+        }
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .hero h1 {
+        font-size: 3em;
+        font-weight: 700;
+        margin-bottom: 24px;
+        line-height: 1.2;
+        color: white;
+        position: relative;
+    }
+
+        .hero h1::before {
+            content: attr(data-text);
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, #ffffff, #b2f7ff);
+            -webkit-mask-image: linear-gradient(90deg, #fff, #fff);
+            mask-image: linear-gradient(90deg, #fff, #fff);
+            -webkit-mask-clip: text;
+            mask-clip: text;
+            -webkit-mask-composite: intersect;
+            mask-composite: intersect;
+            color: transparent;
+        }
+
+
+
+    .hero p {
+        font-size: 1.3em;
+        margin-bottom: 16px;
+        opacity: 0.95;
+        line-height: 1.6;
+    }
+
+    .hero-contact {
+        font-size: 1.1em;
+        margin-top: 24px;
+        opacity: 0.9;
+    }
+
+    .hero-cta {
+        margin-top: 40px;
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero {
+        display: inline-block;
+        padding: 16px 40px;
+        font-size: 1.1em;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: white;
+        color: #007bff;
+        animation: pulse 2.5s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(255,255,255,0.7);
+        }
+
+        50% {
+            box-shadow: 0 0 20px 8px rgba(255,255,255,0.2);
+        }
+    }
+
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+    .btn-secondary {
+        background: transparent;
+        color: white;
+        border-color: white;
+    }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #007bff;
+            transform: translateY(-3px);
+        }
+
+    /* STATS */
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+        margin: 60px 0;
+    }
+
+    .stat-item {
+        background: white;
+        padding: 40px 24px;
+        text-align: center;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .stat-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,123,255,0.15);
+            border-color: #e4f2ff;
+        }
+
+        .stat-item .number {
+            font-size: 3em;
+            font-weight: 700;
+            color: #007bff;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .stat-item .label {
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+    @media (max-width: 768px) {
+        .hero {
+            padding: 60px 20px;
+        }
+
+            .hero h1 {
+                font-size: 2em;
+            }
+    }
+
+    /* SERVICES */
+    #services {
+        scroll-margin-top: 100px;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+        .section-header h2 {
+            font-size: 2.5em;
+            color: #007bff;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            font-size: 1.15em;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 32px;
+        margin-bottom: 60px;
+    }
+
+    .service-card {
+        background: white;
+        padding: 36px 28px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #00b8a9);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,123,255,0.15);
+            border-color: #e4f2ff;
+        }
+
+        .service-card h3 {
+            font-size: 1.4em;
+            color: #007bff;
+            margin-bottom: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .service-card .price {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin: 10px 0 16px 0;
+        }
+
+        .service-card .description {
+            color: #555;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            flex-grow: 1;
+            font-size: 0.98em;
+        }
+
+        .service-card ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+            .service-card ul li {
+                margin: 10px 0;
+                padding-left: 28px;
+                position: relative;
+                line-height: 1.5;
+                font-size: 0.95em;
+            }
+
+                .service-card ul li::before {
+                    content: "✓";
+                    position: absolute;
+                    left: 0;
+                    color: #00b8a9;
+                    font-weight: bold;
+                    font-size: 1.2em;
+                }
+
+    /* FEATURES */
+    .features {
+        background: linear-gradient(135deg, #f8faff 0%, #e4f2ff 100%);
+        padding: 90px 24px;
+        border-radius: 24px;
+        margin: 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .features::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: rgba(0, 123, 255, 0.05);
+            border-radius: 50%;
+            animation: float 25s infinite linear;
+        }
+
+        .features::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -80px;
+            width: 300px;
+            height: 300px;
+            background: rgba(0, 184, 169, 0.05);
+            border-radius: 50%;
+            animation: float 30s infinite reverse linear;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.6em;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 70px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 8px rgba(0, 123, 255, 0.08);
+        }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 36px;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .feature-item {
+        text-align: center;
+        padding: 40px 28px;
+        background: white;
+        border-radius: 18px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        transition: all 0.35s ease;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #00b8a9);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s ease;
+        }
+
+        .feature-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 18px 50px rgba(0, 123, 255, 0.15);
+            border-color: #e4f2ff;
+        }
+
+        .feature-item .icon {
+            font-size: 3.2em;
+            margin-bottom: 20px;
+            display: inline-block;
+            transition: transform 0.4s ease, filter 0.3s ease;
+        }
+
+        .feature-item:hover .icon {
+            transform: scale(1.15) rotate(5deg);
+            filter: drop-shadow(0 4px 8px rgba(0, 123, 255, 0.2));
+        }
+
+        .feature-item h4 {
+            font-size: 1.35em;
+            margin-bottom: 12px;
+            color: #007bff;
+            font-weight: 700;
+        }
+
+        .feature-item p {
+            color: #555;
+            line-height: 1.6;
+            margin: 0 auto;
+            font-size: 1em;
+            max-width: 280px;
+        }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+        .features {
+            padding: 70px 20px;
+            margin: 70px 0;
+        }
+
+            .features h2 {
+                font-size: 2em;
+                margin-bottom: 50px;
+            }
+
+        .feature-item {
+            padding: 32px 20px;
+        }
+
+            .feature-item .icon {
+                font-size: 2.8em;
+                margin-bottom: 16px;
+            }
+    }
+
+
+    /* PRICING */
+    #pricing {
+        max-width: 1200px;
+        margin: 0 auto;
+        scroll-margin-top: 100px;
+        position: relative;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+        .section-header h2 {
+            font-size: 2.5em;
+            color: #007bff;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            font-size: 1.15em;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+    .pricing-tables {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 32px;
+        margin-bottom: 60px;
+        perspective: 1000px;
+    }
+
+    .pricing-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        border: 3px solid transparent;
+        position: relative;
+    }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #007bff, #00b8a9);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+            z-index: 1;
+        }
+
+        .pricing-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 70px rgba(0,123,255,0.25);
+            border-color: rgba(0,123,255,0.1);
+        }
+
+        .pricing-card.featured {
+            border-color: #00b8a9;
+            position: relative;
+            transform: scale(1.05);
+            box-shadow: 0 15px 50px rgba(0,184,169,0.2);
+        }
+
+            .pricing-card.featured:hover {
+                transform: translateY(-15px) scale(1.07);
+                box-shadow: 0 30px 80px rgba(0,184,169,0.3);
+            }
+
+            .pricing-card.featured::after {
+                content: '';
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                background: linear-gradient(135deg, #00b8a9, #007bff);
+                border-radius: 24px;
+                z-index: -1;
+                opacity: 0;
+                transition: opacity 0.4s ease;
+            }
+
+            .pricing-card.featured:hover::after {
+                opacity: 0.1;
+            }
+
+    .pricing-badge {
+        position: absolute;
+        top: 18px; 
+        right: -8px;
+        background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+        color: white;
+        padding: 6px 20px;
+        font-size: 0.8em; 
+        font-weight: 700;
+        border-radius: 20px 0 0 20px;
+        box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+        z-index: 10;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+
+
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .pricing-header {
+        background: linear-gradient(135deg, #007bff 0%, #00b8a9 100%);
+        color: white;
+        padding: 48px 24px 40px;
+        text-align: center;
+        margin: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .pricing-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: floatSlow 15s infinite ease-in-out;
+        }
+
+        .pricing-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            animation: floatSlow 20s infinite ease-in-out reverse;
+        }
+
+    @keyframes floatSlow {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+
+        50% {
+            transform: translate(20px, -20px) rotate(180deg);
+        }
+    }
+
+    .pricing-card.featured .pricing-header {
+        background: linear-gradient(135deg, #00b8a9 0%, #007bff 100%);
+    }
+
+    .pricing-header h3 {
+        color: white;
+        font-size: 1.7em;
+        margin-bottom: 12px;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+        letter-spacing: 0.5px;
+    }
+
+    .price-wrapper {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 8px;
+        margin: 16px 0;
+    }
+
+    .price {
+        font-size: 3em;
+        font-weight: 800;
+        display: inline-block;
+        line-height: 1;
+    }
+
+    .price-currency {
+        font-size: 0.5em;
+        font-weight: 600;
+        opacity: 0.9;
+    }
+
+    .period {
+        font-size: 0.95em;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+
+    .pricing-features {
+        padding: 40px 28px;
+        flex-grow: 1;
+        background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    }
+
+        .pricing-features ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .pricing-features li {
+            padding: 16px 0;
+            padding-left: 36px;
+            position: relative;
+            line-height: 1.6;
+            color: #333;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+            .pricing-features li:hover {
+                padding-left: 40px;
+                color: #007bff;
+            }
+
+            .pricing-features li::before {
+                content: '✓';
+                position: absolute;
+                left: 0;
+                top: 16px;
+                color: #00b8a9;
+                font-weight: bold;
+                font-size: 1.3em;
+                width: 28px;
+                height: 28px;
+                background: rgba(0,184,169,0.1);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .pricing-features li:hover::before {
+                background: rgba(0,184,169,0.2);
+                transform: scale(1.1) rotate(10deg);
+            }
+
+    .pricing-footer {
+        text-align: center;
+        padding: 32px 28px;
+        background: white;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .btn-pricing {
+        display: inline-block;
+        background: linear-gradient(135deg, #007bff, #0056d6);
+        color: white;
+        padding: 18px 52px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        font-size: 1.05em;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,123,255,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-pricing::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-pricing:hover::before {
+            left: 100%;
+        }
+
+        .btn-pricing:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,123,255,0.4);
+        }
+
+        .btn-pricing:active {
+            transform: translateY(-1px);
+        }
+
+    .pricing-card.featured .btn-pricing {
+        background: linear-gradient(135deg, #00b8a9, #007bff);
+        box-shadow: 0 4px 15px rgba(0,184,169,0.3);
+    }
+
+        .pricing-card.featured .btn-pricing:hover {
+            box-shadow: 0 12px 35px rgba(0,184,169,0.5);
+        }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+        .pricing-tables {
+            grid-template-columns: 1fr;
+            gap: 28px;
+        }
+
+        .pricing-card.featured {
+            transform: scale(1);
+        }
+
+            .pricing-card.featured:hover {
+                transform: translateY(-10px) scale(1.02);
+            }
+
+        .section-header h2 {
+            font-size: 2em;
+        }
+
+        .pricing-header {
+            padding: 40px 20px 32px;
+        }
+
+            .pricing-header h3 {
+                font-size: 1.5em;
+            }
+
+        .price {
+            font-size: 2.5em;
+        }
+    }
+
+    /* FAQ */
+    #faq {
+        scroll-margin-top: 100px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .faq-section {
+        margin-top: 80px;
+    }
+
+        .faq-section h2 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #007bff;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+    .faq-subtitle {
+        text-align: center;
+        font-size: 1.15em;
+        color: #666;
+        margin-bottom: 50px;
+        line-height: 1.6;
+    }
+
+    .faq-container {
+        position: relative;
+    }
+
+    .faq-item {
+        background: white;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        position: relative;
+    }
+
+        .faq-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: linear-gradient(180deg, #007bff, #00b8a9);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 8px 30px rgba(0,123,255,0.12);
+            border-color: #e4f2ff;
+        }
+
+        .faq-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .faq-item.active {
+            box-shadow: 0 10px 40px rgba(0,123,255,0.15);
+            border-color: #007bff;
+        }
+
+    .faq-question {
+        padding: 28px 60px 28px 32px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.15em;
+        color: #333;
+        transition: all 0.3s ease;
+        user-select: none;
+        position: relative;
+    }
+
+        .faq-question:hover {
+            color: #007bff;
+            padding-left: 36px;
+        }
+
+        .faq-question span:first-child {
+            flex: 1;
+            padding-right: 20px;
+        }
+
+    .faq-icon {
+        position: absolute;
+        left: 32px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.3em;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover .faq-icon {
+        opacity: 0.3;
+        left: 12px;
+    }
+
+    .faq-toggle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #007bff, #00b8a9);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4em;
+        font-weight: 300;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+    }
+
+    .faq-item:hover .faq-toggle {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    }
+
+    .faq-item.active .faq-toggle {
+        transform: rotate(135deg);
+        background: linear-gradient(135deg, #00b8a9, #007bff);
+    }
+
+    .faq-answer {
+        padding: 0 32px;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        color: #555;
+        line-height: 1.8;
+        font-size: 1.02em;
+        background: linear-gradient(to bottom, rgba(0,123,255,0.02), transparent);
+    }
+
+        .faq-answer.active {
+            padding: 0 32px 28px 32px;
+            max-height: 500px;
+            padding-top: 8px;
+        }
+
+        .faq-answer p {
+            margin: 0;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Добавим счётчик вопросов */
+    .faq-item {
+        counter-increment: faq-counter;
+    }
+
+    .faq-question::before {
+        content: counter(faq-counter);
+        position: absolute;
+        left: -40px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #e4f2ff, #f0f8ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85em;
+        font-weight: 700;
+        color: #007bff;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover .faq-question::before {
+        opacity: 1;
+        left: -50px;
+    }
+
+    .faq-container {
+        counter-reset: faq-counter;
+    }
+
+    /* CTA в конце FAQ */
+    .faq-cta {
+        text-align: center;
+        margin-top: 50px;
+        padding: 40px 24px;
+        background: linear-gradient(135deg, #f8faff 0%, #e4f2ff 100%);
+        border-radius: 20px;
+        border: 2px solid #e4f2ff;
+    }
+
+        .faq-cta h3 {
+            color: #007bff;
+            font-size: 1.5em;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .faq-cta p {
+            color: #666;
+            font-size: 1.05em;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+    .faq-cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #007bff, #0056d6);
+        color: white;
+        padding: 16px 40px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,123,255,0.2);
+    }
+
+        .faq-cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,123,255,0.3);
+        }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+        .faq-section h2 {
+            font-size: 2em;
+        }
+
+        .faq-question {
+            padding: 24px 56px 24px 24px;
+            font-size: 1.05em;
+        }
+
+            .faq-question::before {
+                display: none;
+            }
+
+        .faq-toggle {
+            width: 32px;
+            height: 32px;
+            font-size: 1.2em;
+        }
+
+        .faq-answer.active {
+            padding: 0 24px 24px 24px;
+        }
+
+        .faq-cta {
+            padding: 32px 20px;
+        }
+
+            .faq-cta h3 {
+                font-size: 1.3em;
+            }
+    }
+
+    @media (max-width: 480px) {
+        .faq-section h2 {
+            font-size: 1.8em;
+        }
+
+        .faq-question {
+            padding: 20px 52px 20px 20px;
+            font-size: 1em;
+        }
+    }
+
+    /* CTA */
+    .cta-section {
+        text-align: center;
+        background: linear-gradient(135deg, #00b8a9 0%, #007bff 100%);
+        color: white;
+        padding: 90px 24px;
+        border-radius: 24px;
+        margin: 80px 0;
+        box-shadow: 0 20px 60px rgba(0,123,255,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            animation: float 25s infinite reverse;
+        }
+
+    .cta-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-section h2 {
+        color: white;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        font-weight: 700;
+    }
+
+    .cta-section p {
+        font-size: 1.25em;
+        margin-bottom: 35px;
+        opacity: 0.95;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.7;
+    }
+
+    .btn-large {
+        background: white;
+        color: #007bff;
+        padding: 18px 50px;
+        font-weight: 700;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        font-size: 1.15em;
+        display: inline-block;
+    }
+
+        .btn-large:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+    /* MOBILE OPTIMIZATIONS */
+    @media (max-width: 968px) {
+        section {
+            margin: 60px 0;
+        }
+
+        .hero {
+            padding: 80px 24px;
+        }
+
+            .hero h1 {
+                font-size: 2.4em;
+            }
+
+        .section-header h2 {
+            font-size: 2.2em;
+        }
+
+        .features {
+            padding: 60px 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero {
+            padding: 70px 20px;
+            margin-bottom: 60px;
+        }
+
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+        .hero-cta {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-hero {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 40px 0;
+        }
+
+        .stat-item {
+            padding: 32px 20px;
+        }
+
+            .stat-item .number {
+                font-size: 2.5em;
+            }
+
+        .section-header h2 {
+            font-size: 1.9em;
+        }
+
+        .services-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .service-card {
+            padding: 28px 24px;
+        }
+
+        .features {
+            padding: 50px 20px;
+            margin: 60px 0;
+        }
+
+            .features h2 {
+                font-size: 1.9em;
+                margin-bottom: 40px;
+            }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .pricing-tables {
+            grid-template-columns: 1fr;
+            gap: 28px;
+        }
+
+        .faq-section h2 {
+            font-size: 1.9em;
+        }
+
+        .faq-question {
+            padding: 20px;
+            font-size: 1em;
+        }
+
+        .cta-section {
+            padding: 70px 20px;
+        }
+
+            .cta-section h2 {
+                font-size: 2em;
+            }
+    }
+
+    @media (max-width: 480px) {
+        .stats {
+            grid-template-columns: 1fr;
+        }
+
+        .hero h1 {
+            font-size: 1.75em;
+        }
+
+        .btn-pricing, .btn-large {
+            width: 100%;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            font-size: 1.7em;
+        }
+    }
+
+    /* Smooth animations */
+    @media (prefers-reduced-motion: no-preference) {
+        .service-card,
+        .feature-item,
+        .pricing-card,
+        .stat-item,
+        .faq-item {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+
+
+
+    <div class="hero-content">
+        <h1>Ваш надежный бухгалтер</h1>
+        <p>
+            Я помогаю предпринимателям и компаниям по всему Казахстану чувствовать уверенность в финансовых решениях.
+            От налоговой отчётности до стратегического планирования — всё прозрачно, точно и вовремя.
+        </p>
+
+        <ul class="hero-points">
+            <li>📊 Полное бухгалтерское сопровождение</li>
+            <li>🧾 Налоговые консультации и отчётность</li>
+            <li>💼 Оптимизация учёта и расходов</li>
+        </ul>
+
+        <p class="hero-contact">📞 +7 (701) 362-32-63 · 📧 bukh.df1@mail.ru · 📍 Актобе, Казахстан</p>
+
+        <div class="hero-cta">
+            <a href="/consultation" class="btn-hero btn-primary">Оставить заявку</a>
+            <a href="#services" class="btn-hero btn-secondary">Услуги и цены</a>
+
+        </div>
+
+    </div>
+</section>
+
+<section class="stats">
+    <div class="stat-item">
+        <span class="number">20+</span>
+        <div class="label">Лет работы</div>
+    </div>
+    <div class="stat-item">
+        <span class="number">200+</span>
+        <div class="label">Клиентов</div>
+    </div>
+    <div class="stat-item">
+        <span class="number">1000+</span>
+        <div class="label">Отчетов</div>
+    </div>
+    <div class="stat-item">
+        <span class="number">99%</span>
+        <div class="label">Успех проверок</div>
+    </div>
+</section>
+
+<section id="services" class="services">
+    <div class="section-header">
+        <h2>Наши услуги</h2>
+        <p>Комплексное бухгалтерское сопровождение для малого и среднего бизнеса — от учёта до оптимизации налогов</p>
+    </div>
+
+    <div class="services-grid">
+        {% for key, service in services.items() %}
+        <div class="service-card">
+            <h3>{{ service.name }}</h3>
+
+            {% set price = service.price_range|lower %}
+            <div class="price">
+                {% if price %}
+                {% if 'от' in price or 'мес' in price %}
+                {{ service.price_range }}
+                {% else %}
+                от {{ service.price_range }} / мес
+                {% endif %}
+                {% else %}
+                Цена по запросу
+                {% endif %}
+            </div>
+
+            <div class="short-benefit">
+                {% if key == 'bookkeeping' %}
+                Полное ведение учёта, отчётности и налогов — без головной боли.
+                {% elif key == 'tax_consulting' %}
+                Оптимизация налогов и помощь в выборе выгодных решений.
+                {% elif key == 'reporting' %}
+                Подготовим и сдаём отчётность вовремя, без штрафов и спешки.
+                {% elif key == 'audit' %}
+                Проверим бухгалтерию, выявим риски и дадим практические рекомендации.
+                {% elif key == 'registration' %}
+                Зарегистрируем бизнес «под ключ»: документы, фонды, расчётный счёт.
+                {% elif key == 'salary' %}
+                Расчёт зарплаты, взносов и налогов с соблюдением всех норм.
+                {% endif %}
+            </div>
+
+            <div class="description">{{ service.description }}</div>
+
+            <ul class="service-list">
+                {% if key == 'bookkeeping' %}
+                <li>Учёт операций</li>
+                <li>Налоги и отчётность</li>
+                <li>Ведение первичных документов</li>
+                {% elif key == 'tax_consulting' %}
+                <li>Анализ текущей нагрузки</li>
+                <li>Оптимизация схем налогообложения</li>
+                <li>Консультации по изменениям в законодательстве</li>
+                {% elif key == 'reporting' %}
+                <li>Подготовка отчётности</li>
+                <li>Сдача в контролирующие органы</li>
+                <li>Контроль сроков и корректность данных</li>
+                {% elif key == 'audit' %}
+                <li>Финансовый анализ</li>
+                <li>Проверка документов</li>
+                <li>Рекомендации по устранению ошибок</li>
+                {% elif key == 'registration' %}
+                <li>Подготовка пакета документов</li>
+                <li>Регистрация ИП или ООО</li>
+                <li>Постановка на учёт в фондах</li>
+                {% elif key == 'salary' %}
+                <li>Расчёт зарплаты и налогов</li>
+                <li>Отчётность в фонды</li>
+                <li>Конфиденциальность данных</li>
+                {% endif %}
+            </ul>
+
+            <div class="price-note">Индивидуальный расчёт — бесплатно</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="additional-services">
+        <h3>Дополнительные услуги</h3>
+        <p>Поможем в сложных и нестандартных ситуациях:</p>
+        <ul>
+            <li>Восстановление бухгалтерского учёта</li>
+            <li>Подготовка к налоговой проверке</li>
+            <li>Консультации по выбору системы налогообложения</li>
+            <li>Настройка учётной системы 1С / онлайн-сервисов</li>
+        </ul>
+    </div>
+
+    <div class="note">
+        <p>*Стоимость зависит от объёма операций и формы бизнеса. Индивидуальный расчёт — бесплатно и без обязательств.</p>
+    </div>
+</section>
+
+
+<section class="features">
+    <h2>Почему выбирают нас</h2>
+
+    <div class="features-grid">
+        <div class="feature-item">
+            <div class="icon">⚡</div>
+            <h4>Оперативность</h4>
+            <p>Реагируем на запросы в течение дня, сдаём отчётность строго в срок — без штрафов и задержек.</p>
+        </div>
+
+        <div class="feature-item">
+            <div class="icon">🔒</div>
+            <h4>Конфиденциальность</h4>
+            <p>Надёжно защищаем ваши финансовые данные и используем только сертифицированные сервисы.</p>
+        </div>
+
+        <div class="feature-item">
+            <div class="icon">💼</div>
+            <h4>Опыт и компетентность</h4>
+            <p>20 лет успешной практики и знание нюансов бизнеса в разных отраслях.</p>
+        </div>
+
+        <div class="feature-item">
+            <div class="icon">📞</div>
+            <h4>Поддержка и вовлечённость</h4>
+            <p>Всегда на связи — консультируем и помогаем в любое время, понятно и по делу.</p>
+        </div>
+
+        <div class="feature-item">
+            <div class="icon">✅</div>
+            <h4>Гарантии и надёжность</h4>
+            <p>Работаем по договору, страхуем профессиональную ответственность и соблюдаем стандарты.</p>
+        </div>
+    </div>
+</section>
+
+
+<section id="pricing" class="pricing">
+    <div class="section-header">
+        <h2>Тарифы</h2>
+        <p>Честные и прозрачные цены — без скрытых платежей</p>
+    </div>
+    <div class="pricing-tables">
+        <div class="pricing-card">
+            <div class="pricing-header">
+                <h3>Начальный</h3>
+                <div class="price-wrapper">
+                    <span class="price">50 000<span class="price-currency"> ₸</span></span>
+                </div>
+                <div class="period">в месяц</div>
+            </div>
+            <div class="pricing-features">
+                <ul>
+                    <li>Ведение учёта для ИП</li>
+                    <li>Основная отчётность</li>
+                    <li>Email-консультации</li>
+                    <li>Поддержка 5/7</li>
+                </ul>
+            </div>
+            <div class="pricing-footer">
+                <a href="/consultation" class="btn-pricing">Выбрать тариф</a>
+            </div>
+        </div>
+
+        <div class="pricing-card featured">
+            <div class="pricing-badge">Популярный</div>
+            <div class="pricing-header">
+                <h3>Бизнес</h3>
+                <div class="price-wrapper">
+                    <span class="price">100 000<span class="price-currency"> ₸</span></span>
+                </div>
+                <div class="period">в месяц</div>
+            </div>
+            <div class="pricing-features">
+                <ul>
+                    <li>Учёт для ТОО / ООО</li>
+                    <li>Расширенная отчётность</li>
+                    <li>Налоговое планирование</li>
+                    <li>Телефонные консультации</li>
+                    <li>Поддержка 24/7</li>
+                </ul>
+            </div>
+            <div class="pricing-footer">
+                <a href="/consultation" class="btn-pricing">Выбрать тариф</a>
+            </div>
+        </div>
+
+        <div class="pricing-card">
+            <div class="pricing-header">
+                <h3>Премиум</h3>
+                <div class="price-wrapper">
+                    <span class="price">150 000<span class="price-currency"> ₸</span></span>
+                </div>
+                <div class="period">в месяц</div>
+            </div>
+            <div class="pricing-features">
+                <ul>
+                    <li>Полное бухгалтерское сопровождение</li>
+                    <li>Налоговая оптимизация</li>
+                    <li>Персональный бухгалтер</li>
+                    <li>Выездные консультации</li>
+                    <li>Финансовый анализ</li>
+                </ul>
+            </div>
+            <div class="pricing-footer">
+                <a href="/consultation" class="btn-pricing">Выбрать тариф</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="faq" class="faq-section">
+    <h2>Частые вопросы</h2>
+    <p class="faq-subtitle">Ответы на самые популярные вопросы наших клиентов</p>
+
+    <div class="faq-container">
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon"></span>
+                <span>Как начинается работа?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                <p>Мы анализируем вашу текущую ситуацию, заключаем договор и настраиваем учёт. Первая консультация бесплатна.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon"></span>
+                <span>Можно ли сменить тариф?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                <p>Да, вы можете перейти на другой тариф в любой момент — изменения вступают в силу со следующего месяца.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon"></span>
+                <span>Какие документы нужны?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                <p>Учредительные документы, ИНН, регистрация, данные по текущему учёту. Мы поможем собрать всё необходимое.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon"></span>
+                <span>Как проходит взаимодействие?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                <p>Вся работа ведётся удалённо через защищённые каналы связи. Встречи проводятся по необходимости или по вашему желанию.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon"></span>
+                <span>Что включено в стоимость?</span>
+                <span class="faq-toggle">+</span>
+            </div>
+            <div class="faq-answer">
+                <p>В стоимость тарифа входит всё, что указано в описании. Дополнительные услуги оплачиваются отдельно по договорённости.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Готовы сотрудничать?</h2>
+        <p>Оставьте заявку и получите бесплатную консультацию по оптимизации вашей бухгалтерии</p>
+        <a href="/consultation" class="btn-large">Оставить заявку</a>
+    </div>
+</section>
+
+<script>
+    // FAQ Toggle
+    document.querySelectorAll('.faq-question').forEach(q => {
+        q.addEventListener('click', () => {
+            const item = q.closest('.faq-item');
+            const answer = q.nextElementSibling;
+            const isActive = item.classList.contains('active');
+
+            // Close all other items
+            document.querySelectorAll('.faq-item').forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                    otherItem.querySelector('.faq-answer').classList.remove('active');
+                }
+            });
+
+            // Toggle current item
+            if (isActive) {
+                item.classList.remove('active');
+                answer.classList.remove('active');
+            } else {
+                item.classList.add('active');
+                answer.classList.add('active');
+            }
+        });
+    });
+
+    // Keyboard navigation
+    document.querySelectorAll('.faq-question').forEach((q, index, questions) => {
+        q.setAttribute('tabindex', '0');
+        q.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                q.click();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = (index + 1) % questions.length;
+                questions[nextIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = (index - 1 + questions.length) % questions.length;
+                questions[prevIndex].focus();
+            }
+        });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#' && document.querySelector(href)) {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                const headerOffset = 100;
+                const elementPosition = target.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements with animation
+    document.querySelectorAll('.service-card, .feature-item, .pricing-card, .stat-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+</script>
+{% endblock %}

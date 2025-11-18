@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Бухгалтерские услуги{% endblock %}</title>
+
+    <link rel="icon" href="{{ url_for('favicon') }}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #00b8a9;
+            --text-dark: #2d2d2d;
+            --bg-light: #f5f7fa;
+            --footer-bg: #1a1a1a;
+            --footer-text: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+            .logo:hover {
+                color: var(--secondary);
+            }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+            nav a:hover {
+                background: #e4f2ff;
+                color: var(--primary);
+            }
+
+        .nav-left,
+        .nav-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+            .nav-left a.active {
+                background: var(--primary);
+                color: #fff;
+            }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #333;
+            padding: 8px;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+            flex: 1;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 16px 24px;
+            border-left: 4px solid;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #e8f8ef;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .alert-error {
+            background: #fbeaea;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 60px 0 0;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 50px;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 0 24px 50px;
+        }
+
+        .footer-section h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .footer-section p {
+            line-height: 1.7;
+            color: #b0b0b0;
+            margin-bottom: 15px;
+        }
+
+        .footer-section a {
+            color: #b0b0b0;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            padding: 6px 0;
+            font-size: 0.95em;
+        }
+
+            .footer-section a:hover {
+                color: #fff;
+                padding-left: 8px;
+            }
+
+        .footer-about {
+            grid-column: span 1;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .contact-icon {
+            font-size: 1.2em;
+            color: var(--secondary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+            .social-links a {
+                display: inline-flex;
+                width: 40px;
+                height: 40px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.3em;
+                transition: all 0.3s ease;
+                padding: 0;
+                margin: 0;
+            }
+
+                .social-links a:hover {
+                    background: var(--primary);
+                    transform: translateY(-3px);
+                    padding: 0;
+                }
+
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px 24px;
+            font-size: 0.9em;
+            color: #808080;
+        }
+
+            .footer-bottom p {
+                margin: 0;
+            }
+
+        /* MOBILE */
+        @media (max-width: 968px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+
+            .footer-about {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+                font-size: 1.6em;
+                padding: 6px 10px;
+                border-radius: 6px;
+                transition: background 0.3s;
+            }
+
+                .mobile-menu-btn:hover {
+                    background: rgba(0, 0, 0, 0.05);
+                }
+
+            nav {
+                padding: 14px 20px;
+            }
+
+            /* 🔹 Улучшенное мобильное меню */
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #fff;
+                flex-direction: column;
+                padding: 12px 0;
+                box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+                border-top: 1px solid rgba(0, 0, 0, 0.05);
+                border-radius: 0 0 12px 12px;
+                text-align: center;
+                animation: dropdownFade 0.25s ease;
+                z-index: 999;
+            }
+
+                .nav-menu.active {
+                    display: flex;
+                }
+
+                .nav-menu a {
+                    display: block;
+                    padding: 14px 0;
+                    color: #2d2d2d;
+                    font-size: 1.05em;
+                    font-weight: 500;
+                    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                }
+
+                    .nav-menu a:last-child {
+                        border-bottom: none;
+                    }
+
+                    .nav-menu a:hover {
+                        background: #f2f6ff;
+                        color: var(--primary);
+                    }
+
+            @keyframes dropdownFade {
+                from {
+                    opacity: 0;
+                    transform: translateY(-8px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 35px;
+                padding: 0 20px 40px;
+            }
+
+            .footer-about {
+                grid-column: span 1;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            footer {
+                margin-top: 60px;
+            }
+
+            .footer-content {
+                padding: 0 20px 30px;
+            }
+
+            .social-links a {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1em;
+            }
+        }
+
+        /* Smooth transitions */
+        @media (hover: hover) {
+            nav a:hover,
+            .footer-section a:hover {
+                transition: all 0.2s ease;
+            }
+        }
+
+        /* Accessibility */
+        a:focus,
+        button:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo">Бухгалтер - Гусева Юлия</a>
+            <button class="mobile-menu-btn" onclick="toggleMenu()" aria-label="Меню">☰</button>
+
+            <div class="nav-menu">
+                <!-- 🔹 объединяем левую и правую навигацию -->
+                <a href="/" class="{% if request.path == '/' %}active{% endif %}">Главная</a>
+                <a href="/consultation" class="{% if request.path.startswith('/consultation') %}active{% endif %}">Заявка</a>
+
+                {% if session.user %}
+                <a href="/admin">Админ</a>
+                <a href="/logout">Выход</a>
+                {% else %}
+                <a href="/login">Вход</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section footer-about">
+                <h3>О компании</h3>
+                <p>Профессиональные бухгалтерские услуги для малого и среднего бизнеса. Многолетний опыт и безупречная репутация.</p>
+                <div class="social-links">
+                    <a href="https://wa.me/77013623263" target="_blank" aria-label="WhatsApp">📱</a>
+                    <a href="tel:+77013623263" aria-label="Телефон">📞</a>
+                    <a href="mailto:bukh.df1@mail.ru" aria-label="Email">📧</a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Услуги</h3>
+                <a href="/#services">Ведение бухгалтерии</a>
+                <a href="/#services">Налоговое консультирование</a>
+                <a href="/#services">Отчётность</a>
+                <a href="/#services">Аудит</a>
+                <a href="/#services">Регистрация бизнеса</a>
+            </div>
+
+            <div class="footer-section">
+                <h3>Компания</h3>
+                <a href="/">Главная</a>
+                <a href="/consultation">Оставить заявку</a>
+                <a href="/#pricing">Тарифы</a>
+                <a href="/#faq">Частые вопросы</a>
+            </div>
+
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <a href="tel:+77013623263">+7 (701) 362-32-63</a>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📧</span>
+                    <a href="mailto:bukh.df1@mail.ru">bukh.df1@mail.ru</a>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📍</span>
+                    <span style="color: #b0b0b0; font-size: 0.95em;">Актобе, Казахстан</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2025 Бухгалтер Гусева Юлия. Все права защищены. Профессиональные бухгалтерские услуги.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector('.nav-menu').classList.toggle('active');
+        }
+
+        // Закрытие при клике вне меню
+        document.addEventListener('click', function (e) {
+            const navMenu = document.querySelector('.nav-menu');
+            const btn = document.querySelector('.mobile-menu-btn');
+            if (!navMenu.contains(e.target) && !btn.contains(e.target)) {
+                navMenu.classList.remove('active');
+            }
+        });
+
+        // Smooth scroll для якорных ссылок
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && document.querySelector(href)) {
+                    e.preventDefault();
+                    document.querySelector(href).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

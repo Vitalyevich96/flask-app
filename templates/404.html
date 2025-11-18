@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Страница не найдена{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 80px 20px;">
+    <h1 style="font-size: 4em; color: #007bff; margin-bottom: 20px;">404</h1>
+    <h2 style="color: #333; margin-bottom: 20px;">Страница не найдена</h2>
+    <p style="color: #666; margin-bottom: 30px; font-size: 1.1em;">
+        Запрашиваемая страница не существует или была перемещена.
+    </p>
+    <a href="/" style="display: inline-block; background: #007bff; color: white;
+                      padding: 12px 30px; text-decoration: none; border-radius: 8px;
+                      font-weight: 600; transition: all 0.3s;">
+        Вернуться на главную
+    </a>
+</div>
+{% endblock %}

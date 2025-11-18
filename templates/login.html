@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Login Wrapper */
+    .login-container {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.06);
+        max-width: 400px;
+        margin: 60px auto;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+        .login-container h2 {
+            font-size: 1.6em;
+            font-weight: 600;
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+
+    /* Input Groups */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: 0.3s;
+        }
+
+            .form-group input:focus {
+                border-color: #00b8a9;
+                box-shadow: 0 0 5px rgba(0,184,169,0.3);
+                outline: none;
+            }
+
+    /* Button */
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #00b8a9, #007bff);
+        color: white;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #00c4b5, #1a63ff);
+        }
+
+    /* Subtle fade-in */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+        .login-container {
+            margin: 40px 20px;
+            padding: 30px 25px;
+        }
+
+        .form-group input {
+            padding: 14px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h2>Вход в админ-панель</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="login">Логин:</label>
+            <input type="text" id="login" name="login" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Войти</button>
+    </form>
+</div>
+{% endblock %}
