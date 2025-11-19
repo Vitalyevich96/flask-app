@@ -9,6 +9,10 @@ import uuid
 import requests
 import pg8000
 import time
+import pytz
+from datetime import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 SERVICES = {
     'accounting': {
@@ -165,6 +169,19 @@ def ensure_telegram_chats_schema():
     finally:
         if conn:
             conn.close()
+
+def get_local_time():
+    """Получить текущее время в часовом поясе +5 (Алматы/Астана)"""
+    try:
+        # Используем встроенный zoneinfo (Python 3.9+)
+        tz = ZoneInfo('Asia/Almaty')
+        local_time = datetime.now(tz)
+        return local_time.strftime('%d.%m.%Y %H:%M:%S')
+    except:
+        # Фолбэк если zoneinfo не доступен
+        utc_time = datetime.utcnow()
+        local_time = utc_time + timedelta(hours=5)
+        return local_time.strftime('%d.%m.%Y %H:%M:%S')
 
 def init_db():
     """Инициализировать таблицы в базе данных"""
@@ -474,8 +491,19 @@ def get_stats_message():
         requests_list = load_requests()
         clients = load_clients()
         
-        today = datetime.now().date()
-        today_requests = [r for r in requests_list if datetime.strptime(r['date'], '%d.%m.%Y %H:%M:%S').date() == today]
+        # Используем локальное время для фильтрации
+        today = datetime.now(pytz.timezone('Asia/Almaty')).date() if 'pytz' in globals() else (datetime.utcnow() + timedelta(hours=5)).date()
+        
+        today_requests = []
+        for req in requests_list:
+            try:
+                # Парсим дату в локальном времени
+                req_date = datetime.strptime(req['date'], '%d.%m.%Y %H:%M:%S')
+                # Если дата сохранена в UTC, конвертируем в локальное время
+                if req_date.date() == today:
+                    today_requests.append(req)
+            except:
+                continue
         
         new_count = len([r for r in requests_list if r['status'] == 'новая'])
         completed_count = len([r for r in requests_list if r['status'] == 'завершена'])
@@ -500,9 +528,16 @@ def get_today_requests_message():
     """Получить заявки за сегодня"""
     try:
         requests_list = load_requests()
-        today = datetime.now().date()
-        today_requests = [r for r in requests_list 
-                         if datetime.strptime(r['date'], '%d.%m.%Y %H:%M:%S').date() == today]
+        today = datetime.now(pytz.timezone('Asia/Almaty')).date() if 'pytz' in globals() else (datetime.utcnow() + timedelta(hours=5)).date()
+        
+        today_requests = []
+        for req in requests_list:
+            try:
+                req_date = datetime.strptime(req['date'], '%d.%m.%Y %H:%M:%S')
+                if req_date.date() == today:
+                    today_requests.append(req)
+            except:
+                continue
         
         if not today_requests:
             return "📅 *ЗАЯВКИ ЗА СЕГОДНЯ*\n\nНет заявок за сегодня"
@@ -791,7 +826,7 @@ def consultation():
             'email': email,
             'phone': phone,
             'company_type': company_type,
-            'created_date': datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+            'created_date': get_local_time(),
             'requests_count': 1
         }
         save_client(new_client)
@@ -805,7 +840,7 @@ def consultation():
             'company_type': company_type,
             'message': message,
             'urgency': urgency,
-            'date': datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+            'date': get_local_time(),
             'status': 'новая',
             'assigned_to': '',
             'notes': ''
