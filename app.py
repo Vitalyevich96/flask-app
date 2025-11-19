@@ -141,15 +141,17 @@ def ensure_telegram_chats_schema():
         print(f"📋 Существующие колонки: {existing_columns}")
         
         # Добавить недостающие колонки
-        if 'username' not in existing_columns:
-            print("➕ Добавляю колонку username")
-            cur.execute('ALTER TABLE telegram_chats ADD COLUMN username VARCHAR(100)')
-            conn.commit()
+        columns_to_add = {
+            'username': 'VARCHAR(100)',
+            'first_name': 'VARCHAR(100)',
+            'notification_enabled': 'BOOLEAN DEFAULT TRUE'
+        }
         
-        if 'first_name' not in existing_columns:
-            print("➕ Добавляю колонку first_name")
-            cur.execute('ALTER TABLE telegram_chats ADD COLUMN first_name VARCHAR(100)')
-            conn.commit()
+        for column_name, column_type in columns_to_add.items():
+            if column_name not in existing_columns:
+                print(f"➕ Добавляю колонку {column_name}")
+                cur.execute(f'ALTER TABLE telegram_chats ADD COLUMN {column_name} {column_type}')
+                conn.commit()
         
         cur.close()
         print("✅ Схема таблицы telegram_chats проверена и обновлена")
@@ -290,14 +292,17 @@ def load_telegram_chats():
 def save_telegram_chat(chat_id, username=None, first_name=None):
     """Сохранить или обновить chat_id в базе данных"""
     max_retries = 3
+    schema_fixed = False
+    
     for attempt in range(max_retries):
         conn = None
         try:
             print(f"🔄 Попытка {attempt + 1} сохранения чата {chat_id}")
             
-            # При первой попытке проверяем схему
-            if attempt == 0:
+            # При первой попытке или после ошибки схемы - проверяем схему
+            if not schema_fixed:
                 ensure_telegram_chats_schema()
+                schema_fixed = True
             
             conn = get_db_connection()
             if not conn:
@@ -339,10 +344,17 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
             return True
             
         except Exception as e:
+            error_msg = str(e)
             print(f"❌ Ошибка сохранения Telegram чата (попытка {attempt + 1}): {type(e).__name__}: {e}")
             import traceback
             print(traceback.format_exc())
-            if attempt < max_retries - 1:
+            
+            # Если ошибка связана с отсутствующей колонкой, сбрасываем флаг
+            if 'does not exist' in error_msg and attempt < max_retries - 1:
+                print("🔄 Обнаружена проблема со схемой, повторяю проверку...")
+                schema_fixed = False
+                time.sleep(1)
+            elif attempt < max_retries - 1:
                 time.sleep(1)
         finally:
             if conn:
