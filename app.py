@@ -55,29 +55,36 @@ ADMIN_PASSWORD = 'admin1802'
 TELEGRAM_BOT_TOKEN = '7561142289:AAFVFusO4EQqxsz4-oDJjVHUPEfhIarlAcs'
 
 def set_telegram_webhook():
-    """Настроить webhook для Telegram бота"""
-    try:
-        app_url = os.environ.get('APP_URL', 'https://buhgalter-aktobe.vercel.app')
-        webhook_url = f"{app_url}/telegram-webhook"
+    """Настроить webhook для Telegram бота с повторными попытками"""
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            app_url = os.environ.get('APP_URL', 'https://buhgalter-aktobe.vercel.app')
+            webhook_url = f"{app_url}/telegram-webhook"
+            
+            url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook"
+            payload = {
+                'url': webhook_url,
+                'allowed_updates': ['message', 'callback_query'],
+                'drop_pending_updates': True
+            }
+            
+            response = requests.post(url, json=payload, timeout=10)
+            result = response.json()
+            
+            if result.get('ok'):
+                print(f"✅ Telegram webhook установлен: {webhook_url} (попытка {attempt + 1})")
+                return result
+            else:
+                print(f"❌ Ошибка установки webhook (попытка {attempt + 1}): {result}")
+                
+        except Exception as e:
+            print(f"❌ Ошибка в set_telegram_webhook (попытка {attempt + 1}): {e}")
         
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook"
-        payload = {
-            'url': webhook_url,
-            'allowed_updates': ['message', 'callback_query']
-        }
-        
-        response = requests.post(url, json=payload, timeout=10)
-        result = response.json()
-        
-        if result.get('ok'):
-            print(f"✅ Telegram webhook установлен: {webhook_url}")
-        else:
-            print(f"❌ Ошибка установки webhook: {result}")
-        
-        return result
-    except Exception as e:
-        print(f"❌ Ошибка в set_telegram_webhook: {e}")
-        return {'ok': False, 'error': str(e)}
+        if attempt < max_retries - 1:
+            time.sleep(2)
+    
+    return {'ok': False, 'error': 'Все попытки установки webhook не удались'}
 
 def get_db_connection():
     """Создать соединение с Neon database используя pg8000"""
@@ -138,15 +145,15 @@ def init_db():
         ''')
         
         cur.execute('''
-            CREATE TABLE IF NOT EXISTS telegram_chats (
-                id SERIAL PRIMARY KEY,
-                chat_id BIGINT UNIQUE NOT NULL,
-                username VARCHAR(100),
-                first_name VARCHAR(100),
-                notification_enabled BOOLEAN DEFAULT TRUE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
+    CREATE TABLE IF NOT EXISTS telegram_chats (
+        id SERIAL PRIMARY KEY,
+        chat_id BIGINT UNIQUE NOT NULL,
+        username VARCHAR(100),
+        first_name VARCHAR(100),
+        notification_enabled BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+''')
         
         conn.commit()
         cur.close()
@@ -160,7 +167,7 @@ def init_db():
 init_db()
 
 def load_telegram_chats():
-    """Загрузить список chat_id из базы данных"""
+    """Загрузить список chat_id с статусом 1 из базы данных"""
     conn = get_db_connection()
     if not conn:
         return []
@@ -169,6 +176,7 @@ def load_telegram_chats():
         cur = conn.cursor()
         cur.execute('SELECT chat_id FROM telegram_chats WHERE notification_enabled = TRUE')
         chats = [row[0] for row in cur.fetchall()]
+        print(f"📊 Загружено {len(chats)} пользователей со статусом 1")
         return chats
     except Exception as e:
         print(f"❌ Ошибка загрузки Telegram чатов: {e}")
@@ -178,7 +186,7 @@ def load_telegram_chats():
             conn.close()
 
 def save_telegram_chat(chat_id, username=None, first_name=None):
-    """Сохранить новый chat_id в базу данных"""
+    """Сохранить или обновить chat_id в базе данных"""
     conn = get_db_connection()
     if not conn:
         return False
@@ -194,7 +202,7 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
                          notification_enabled = TRUE
         ''', (chat_id, username, first_name))
         conn.commit()
-        print(f"✅ Новый подписчик Telegram: {chat_id} (@{username})")
+        print(f"✅ Пользователь добавлен/обновлен: {chat_id} (@{username}) - статус: 1")
         return True
     except Exception as e:
         print(f"❌ Ошибка сохранения Telegram чата: {e}")
@@ -228,9 +236,17 @@ def send_telegram_message(chat_id, message, parse_mode='Markdown', reply_markup=
 def send_telegram_notification(request_data):
     """Отправить уведомление о новой заявке в Telegram"""
     try:
+        print(f"🔔 Начало отправки уведомления для заявки {request_data.get('id')}")
+        
         chats = load_telegram_chats()
+        print(f"📋 Найдено подписчиков: {len(chats)}")
+        print(f"📋 Chat IDs: {chats}")
+        
         if not chats:
             print("ℹ️ Нет подписчиков Telegram для уведомлений")
+            test_chat_id = 573190621
+            test_message = "🔔 Тестовое уведомление: система работает!"
+            send_telegram_message(test_chat_id, test_message)
             return
         
         service_name = SERVICES.get(request_data['service_type'], {}).get('name', request_data['service_type'])
@@ -284,6 +300,25 @@ _{message_text}_
         
     except Exception as e:
         print(f"❌ Ошибка в send_telegram_notification: {e}")
+
+def disable_telegram_notifications(chat_id):
+    """Установить статус 0 для пользователя"""
+    conn = get_db_connection()
+    if not conn:
+        return False
+        
+    try:
+        cur = conn.cursor()
+        cur.execute('UPDATE telegram_chats SET notification_enabled = FALSE WHERE chat_id = %s', (chat_id,))
+        conn.commit()
+        print(f"✅ Уведомления отключены для пользователя: {chat_id} (статус: 0)")
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка отключения уведомлений: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
 
 def get_stats_message():
     """Получить статистику для отправки в Telegram"""
@@ -513,6 +548,37 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+def get_user_status_message(chat_id):
+    """Получить текстовое сообщение о статусе пользователя"""
+    conn = get_db_connection()
+    if not conn:
+        return "Неизвестно (ошибка базы данных)"
+        
+    try:
+        cur = conn.cursor()
+        cur.execute('SELECT notification_enabled FROM telegram_chats WHERE chat_id = %s', (chat_id,))
+        result = cur.fetchone()
+        
+        if result:
+            status = result[0]
+            return "✅ Уведомления ВКЛЮЧЕНЫ (1)" if status else "❌ Уведомления ОТКЛЮЧЕНЫ (0)"
+        else:
+            return "❓ Не зарегистрирован (отправьте /start)"
+    except Exception as e:
+        print(f"❌ Ошибка получения статуса пользователя: {e}")
+        return "Неизвестно (ошибка)"
+    finally:
+        if conn:
+            conn.close()
+
+with app.app_context():
+    print("🔄 Настраиваю Telegram вебхук при запуске...")
+    result = set_telegram_webhook()
+    if result and result.get('ok'):
+        print("✅ Вебхук успешно настроен")
+    else:
+        print("❌ Ошибка настройки вебхука")
 
 @app.route('/')
 def index():
@@ -773,7 +839,6 @@ def telegram_webhook():
         data = request.get_json()
         print(f"📥 Telegram webhook data: {json.dumps(data, ensure_ascii=False)}")
         
-        # Обработка текстовых сообщений
         if 'message' in data:
             message = data['message']
             chat_id = message['chat']['id']
@@ -781,7 +846,6 @@ def telegram_webhook():
             first_name = message['chat'].get('first_name', 'Пользователь')
             text = message.get('text', '').strip().lower()
             
-            # Команда /start
             if text == '/start':
                 save_telegram_chat(chat_id, username, first_name)
                 welcome_message = f"""
@@ -793,53 +857,46 @@ def telegram_webhook():
 /stats - статистика заявок
 /today - заявки за сегодня
 /help - справка по командам
-/stop - отписаться от уведомлений
+/stop - отключить уведомления
 
 💡 *Быстрые действия:*
 Когда придёт новая заявка, вы увидите кнопки для быстрой обработки прямо в сообщении!
+
+✅ *Текущий статус:* Уведомления ВКЛЮЧЕНЫ (1)
                 """.strip()
                 send_telegram_message(chat_id, welcome_message)
             
-            # Команда /stop
             elif text == '/stop':
-                conn = get_db_connection()
-                if conn:
-                    try:
-                        cur = conn.cursor()
-                        cur.execute('UPDATE telegram_chats SET notification_enabled = FALSE WHERE chat_id = %s', (chat_id,))
-                        conn.commit()
-                        cur.close()
-                        print(f"✅ Подписчик отключил уведомления: {chat_id}")
-                    finally:
-                        conn.close()
+                if disable_telegram_notifications(chat_id):
+                    goodbye_message = """
+🔕 *Уведомления отключены*
+
+Вы больше не будете получать уведомления о новых заявках.
+
+❌ *Текущий статус:* Уведомления ОТКЛЮЧЕНЫ (0)
+
+Чтобы снова включить уведомления, отправьте /start
+                    """.strip()
+                else:
+                    goodbye_message = "❌ Произошла ошибка при отключении уведомлений"
                 
-                goodbye_message = """
-😔 *Вы отписались от уведомлений*
-
-Теперь вы не будете получать сообщения о новых заявках.
-
-Чтобы снова подписаться, отправьте /start
-                """.strip()
                 send_telegram_message(chat_id, goodbye_message)
             
-            # Команда /stats
             elif text == '/stats':
                 stats_message = get_stats_message()
                 send_telegram_message(chat_id, stats_message)
             
-            # Команда /today
             elif text == '/today':
                 today_message = get_today_requests_message()
                 send_telegram_message(chat_id, today_message)
             
-            # Команда /help
             elif text == '/help':
-                help_message = """
+                help_message = f"""
 📚 *СПРАВКА ПО КОМАНДАМ*
 
 *Основные команды:*
-/start - подписаться на уведомления
-/stop - отписаться от уведомлений
+/start - подписаться на уведомления (статус 1)
+/stop - отключить уведомления (статус 0)
 /stats - показать статистику заявок
 /today - показать заявки за сегодня
 /help - эта справка
@@ -853,12 +910,13 @@ def telegram_webhook():
 ✔️ *Завершить* - закрыть заявку
 
 💡 *Совет:* Используйте кнопки прямо из уведомления - это быстрее!
+
+👤 *Ваш статус:* {get_user_status_message(chat_id)}
                 """.strip()
                 send_telegram_message(chat_id, help_message)
             
-            # Неизвестная команда
             else:
-                unknown_message = """
+                unknown_message = f"""
 🤔 *Неизвестная команда*
 
 Используйте /help для списка доступных команд
@@ -867,43 +925,38 @@ def telegram_webhook():
 /stats - статистика
 /today - заявки за сегодня
 /help - справка
+
+👤 *Ваш статус:* {get_user_status_message(chat_id)}
                 """.strip()
                 send_telegram_message(chat_id, unknown_message)
         
-        # Обработка нажатий на inline кнопки
         elif 'callback_query' in data:
             callback = data['callback_query']
             chat_id = callback['message']['chat']['id']
             message_id = callback['message']['message_id']
             callback_data = callback['data']
             
-            # Разбираем callback_data
             action, request_id = callback_data.split('_', 1)
             request_id = int(request_id)
             
-            # Получаем данные заявки
             requests_list = load_requests()
             current_request = next((r for r in requests_list if r['id'] == request_id), None)
             
             if not current_request:
                 answer_text = "❌ Заявка не найдена"
             elif action == 'take':
-                # Взять в работу
                 if update_request_status(request_id, 'в работе'):
                     answer_text = f"✅ Заявка #{request_id} взята в работу"
                 else:
                     answer_text = "❌ Ошибка обновления статуса"
             
             elif action == 'contact':
-                # Показать контакты
                 answer_text = f"📞 Контакты клиента:\n{current_request['phone']}\n{current_request['email']}"
             
             elif action == 'urgent':
-                # Отметить срочной
                 answer_text = f"⚡ Заявка #{request_id} отмечена как срочная"
             
             elif action == 'complete':
-                # Завершить
                 if update_request_status(request_id, 'завершена'):
                     answer_text = f"✔️ Заявка #{request_id} завершена"
                 else:
@@ -912,7 +965,6 @@ def telegram_webhook():
             else:
                 answer_text = "❓ Неизвестное действие"
             
-            # Отправляем ответ на callback
             try:
                 url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/answerCallbackQuery"
                 payload = {
@@ -922,7 +974,6 @@ def telegram_webhook():
                 }
                 requests.post(url, json=payload, timeout=10)
                 
-                # Обновляем сообщение, убирая кнопки для завершенных заявок
                 if action == 'complete':
                     edit_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup"
                     edit_payload = {
