@@ -366,7 +366,8 @@ def get_today_requests_message():
             status_emoji = {'новая': '🆕', 'в работе': '🔄', 'завершена': '✅'}.get(req['status'], '📋')
             
             message += f"""
-{idx}. 👤 {req['name']} | 📱 {req['phone']}
+{idx}. 👤 {req['name']} | 
+   📱 {req['phone']}
    💼 {service_name}
    ⏰ {req['date'].split()[1]}
 
