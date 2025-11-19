@@ -104,86 +104,116 @@ def get_db_connection():
 
 def init_db():
     """Инициализировать таблицы в базе данных"""
-    conn = get_db_connection()
-    if not conn:
-        print("❌ Не удалось подключиться к базе данных для инициализации")
-        return
-        
-    try:
-        cur = conn.cursor()
-        
-        cur.execute('''
-            CREATE TABLE IF NOT EXISTS requests (
-                id SERIAL PRIMARY KEY,
-                client_id UUID NOT NULL,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(100) NOT NULL,
-                phone VARCHAR(20) NOT NULL,
-                service_type VARCHAR(50) NOT NULL,
-                company_type VARCHAR(50),
-                message TEXT,
-                urgency VARCHAR(20) DEFAULT 'standard',
-                date VARCHAR(50) NOT NULL,
-                status VARCHAR(20) DEFAULT 'новая',
-                assigned_to VARCHAR(100) DEFAULT '',
-                notes TEXT DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        
-        cur.execute('''
-            CREATE TABLE IF NOT EXISTS clients (
-                id UUID PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(100) NOT NULL,
-                phone VARCHAR(20) NOT NULL,
-                company_type VARCHAR(50),
-                created_date VARCHAR(50) NOT NULL,
-                requests_count INTEGER DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        
-        cur.execute('''
-    CREATE TABLE IF NOT EXISTS telegram_chats (
-        id SERIAL PRIMARY KEY,
-        chat_id BIGINT UNIQUE NOT NULL,
-        username VARCHAR(100),
-        first_name VARCHAR(100),
-        notification_enabled BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-''')
-        
-        conn.commit()
-        cur.close()
-        print("✅ База данных Neon инициализирована успешно")
-    except Exception as e:
-        print(f"❌ Ошибка инициализации базы данных: {e}")
-    finally:
-        if conn:
-            conn.close()
-
-init_db()
+    max_retries = 3
+    for attempt in range(max_retries):
+        conn = get_db_connection()
+        if not conn:
+            print(f"❌ Попытка {attempt + 1}: Не удалось подключиться к базе данных")
+            if attempt < max_retries - 1:
+                time.sleep(2)
+            continue
+            
+        try:
+            cur = conn.cursor()
+            
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS telegram_chats (
+                    id SERIAL PRIMARY KEY,
+                    chat_id BIGINT UNIQUE NOT NULL,
+                    username VARCHAR(100),
+                    first_name VARCHAR(100),
+                    notification_enabled BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS requests (
+                    id SERIAL PRIMARY KEY,
+                    client_id UUID NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) NOT NULL,
+                    phone VARCHAR(20) NOT NULL,
+                    service_type VARCHAR(50) NOT NULL,
+                    company_type VARCHAR(50),
+                    message TEXT,
+                    urgency VARCHAR(20) DEFAULT 'standard',
+                    date VARCHAR(50) NOT NULL,
+                    status VARCHAR(20) DEFAULT 'новая',
+                    assigned_to VARCHAR(100) DEFAULT '',
+                    notes TEXT DEFAULT '',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS clients (
+                    id UUID PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) NOT NULL,
+                    phone VARCHAR(20) NOT NULL,
+                    company_type VARCHAR(50),
+                    created_date VARCHAR(50) NOT NULL,
+                    requests_count INTEGER DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            conn.commit()
+            cur.close()
+            print("✅ База данных Neon инициализирована успешно")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Ошибка инициализации базы данных (попытка {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(2)
+        finally:
+            if conn:
+                conn.close()
+    
+    return False
 
 def load_telegram_chats():
-    """Загрузить список chat_id с статусом 1 из базы данных"""
-    conn = get_db_connection()
-    if not conn:
-        return []
-        
-    try:
-        cur = conn.cursor()
-        cur.execute('SELECT chat_id FROM telegram_chats WHERE notification_enabled = TRUE')
-        chats = [row[0] for row in cur.fetchall()]
-        print(f"📊 Загружено {len(chats)} пользователей со статусом 1")
-        return chats
-    except Exception as e:
-        print(f"❌ Ошибка загрузки Telegram чатов: {e}")
-        return []
-    finally:
-        if conn:
-            conn.close()
+    """Загрузить список chat_id с включенными уведомлениями из базы данных"""
+    max_retries = 3
+    for attempt in range(max_retries):
+        conn = get_db_connection()
+        if not conn:
+            print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
+            if attempt < max_retries - 1:
+                time.sleep(1)
+            continue
+            
+        try:
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'telegram_chats'
+                )
+            """)
+            table_exists = cur.fetchone()[0]
+            
+            if not table_exists:
+                print("❌ Таблица telegram_chats не существует")
+                return []
+            
+            cur.execute('SELECT chat_id FROM telegram_chats WHERE notification_enabled = TRUE')
+            chats = [row[0] for row in cur.fetchall()]
+            print(f"📊 Загружено {len(chats)} пользователей с включенными уведомлениями")
+            return chats
+            
+        except Exception as e:
+            print(f"❌ Ошибка загрузки Telegram чатов (попытка {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(1)
+        finally:
+            if conn:
+                conn.close()
+    
+    return []
 
 def save_telegram_chat(chat_id, username=None, first_name=None):
     """Сохранить или обновить chat_id в базе данных"""
@@ -240,61 +270,41 @@ def send_telegram_notification(request_data):
         
         chats = load_telegram_chats()
         print(f"📋 Найдено подписчиков: {len(chats)}")
-        print(f"📋 Chat IDs: {chats}")
         
         if not chats:
             print("ℹ️ Нет подписчиков Telegram для уведомлений")
-            test_chat_id = 573190621
-            test_message = "🔔 Тестовое уведомление: система работает!"
-            send_telegram_message(test_chat_id, test_message)
+            print("ℹ️ Уведомления не отправлены - нет подписчиков")
             return
         
         service_name = SERVICES.get(request_data['service_type'], {}).get('name', request_data['service_type'])
         
         urgency_map = {
-            'standard': ('🟢', 'Стандартная (1–2 дня)'),
-            'urgent': ('🟡', 'Срочная (в течение дня)'), 
-            'very_urgent': ('🔴', 'Очень срочная (несколько часов)')
+            'standard': 'Стандартная (1–2 дня)',
+            'urgent': 'Срочная (в течение дня)', 
+            'very_urgent': 'Очень срочная (несколько часов)'
         }
-        urgency_emoji, urgency_text = urgency_map.get(request_data.get('urgency', 'standard'), ('🟢', 'Стандартная'))
-        
-        message_text = request_data.get('message', 'Не указано')
-        if len(message_text) > 200:
-            message_text = message_text[:200] + '...'
+        urgency_text = urgency_map.get(request_data.get('urgency', 'standard'), 'Стандартная')
         
         message = f"""
-🆕 *НОВАЯ ЗАЯВКА #{request_data.get('id', 'N/A')}*
+🆕 *НОВАЯ ЗАЯВКА*
 
-👤 *Клиент:* {request_data['name']}
+👤 *Имя:* {request_data['name']}
+📧 *Email:* {request_data['email']}
 📱 *Телефон:* `{request_data['phone']}`
-📧 *Email:* `{request_data['email']}`
-
 💼 *Услуга:* {service_name}
-🏢 *Компания:* {request_data.get('company_type', 'Не указано')}
-{urgency_emoji} *Срочность:* {urgency_text}
-📅 *Дата:* {request_data['date']}
+🏢 *Тип компании:* {request_data.get('company_type', 'Не указано')}
+⏰ *Срочность:* {urgency_text}
+📅 *Дата заявки:* {request_data['date']}
 
 💬 *Сообщение:*
-_{message_text}_
+{request_data.get('message', 'Не указано')}
         """.strip()
 
-        reply_markup = {
-            'inline_keyboard': [
-                [
-                    {'text': '✅ Взять в работу', 'callback_data': f'take_{request_data.get("id")}'},
-                    {'text': '📞 Связаться', 'callback_data': f'contact_{request_data.get("id")}'}
-                ],
-                [
-                    {'text': '⚡ Отметить срочной', 'callback_data': f'urgent_{request_data.get("id")}'},
-                    {'text': '✔️ Завершить', 'callback_data': f'complete_{request_data.get("id")}'}
-                ]
-            ]
-        }
-        
         successful_sends = 0
         for chat_id in chats:
-            if send_telegram_message(chat_id, message, reply_markup=reply_markup):
+            if send_telegram_message(chat_id, message):
                 successful_sends += 1
+                print(f"✅ Уведомление отправлено в chat_id: {chat_id}")
         
         print(f"✅ Уведомления отправлены {successful_sends}/{len(chats)} подписчикам")
         
@@ -366,7 +376,7 @@ def get_today_requests_message():
             status_emoji = {'новая': '🆕', 'в работе': '🔄', 'завершена': '✅'}.get(req['status'], '📋')
             
             message += f"""
-{idx}. 👤 {req['name']} | 
+{idx}. 👤 {req['name']} 
    📱 {req['phone']}
    💼 {service_name}
    ⏰ {req['date'].split()[1]}
@@ -828,6 +838,16 @@ def api_stats():
     }
     
     return jsonify(stats)
+
+@app.route('/admin/init-db')
+@login_required
+def init_db_manual():
+    """Ручная инициализация базы данных"""
+    if init_db():
+        flash('✅ База данных инициализирована успешно', 'success')
+    else:
+        flash('❌ Ошибка инициализации базы данных', 'error')
+    return redirect(url_for('admin_panel'))
 
 @app.route('/telegram-webhook', methods=['GET', 'POST'])
 def telegram_webhook():
