@@ -553,26 +553,18 @@ def delete_request(request_id):
 @login_required
 def update_status(request_id, status):
     """Обновить статус заявки"""
-    if hasattr(status, 'decode'):
-        status = status.decode('utf-8')
-    
-    status = status.lower().strip()
-    
-    valid_statuses = ['новая', 'завершена', 'new', 'completed']
-    
     status_mapping = {
-        'new': 'новая',
-        'completed': 'завершена'
+        'completed': 'завершена',
+        'new': 'новая'
     }
     
-    if status in status_mapping:
-        status = status_mapping[status]
-    
-    if status not in ['новая', 'завершена']:
+    if status not in status_mapping:
         flash('Неверный статус', 'error')
         return redirect(url_for('admin_panel'))
     
-    if update_request_status(request_id, status):
+    russian_status = status_mapping[status]
+    
+    if update_request_status(request_id, russian_status):
         flash('Статус обновлен', 'success')
     else:
         flash('Заявка не найдена', 'error')
