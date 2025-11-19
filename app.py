@@ -217,29 +217,53 @@ def load_telegram_chats():
 
 def save_telegram_chat(chat_id, username=None, first_name=None):
     """Сохранить или обновить chat_id в базе данных"""
-    conn = get_db_connection()
-    if not conn:
-        return False
-        
-    try:
-        cur = conn.cursor()
-        cur.execute('''
-            INSERT INTO telegram_chats (chat_id, username, first_name, notification_enabled) 
-            VALUES (%s, %s, %s, TRUE) 
-            ON CONFLICT (chat_id) 
-            DO UPDATE SET username = EXCLUDED.username, 
-                         first_name = EXCLUDED.first_name,
-                         notification_enabled = TRUE
-        ''', (chat_id, username, first_name))
-        conn.commit()
-        print(f"✅ Пользователь добавлен/обновлен: {chat_id} (@{username}) - статус: 1")
-        return True
-    except Exception as e:
-        print(f"❌ Ошибка сохранения Telegram чата: {e}")
-        return False
-    finally:
-        if conn:
-            conn.close()
+    max_retries = 3
+    for attempt in range(max_retries):
+        conn = get_db_connection()
+        if not conn:
+            print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
+            if attempt < max_retries - 1:
+                time.sleep(1)
+            continue
+            
+        try:
+            cur = conn.cursor()
+            
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS telegram_chats (
+                    id SERIAL PRIMARY KEY,
+                    chat_id BIGINT UNIQUE NOT NULL,
+                    username VARCHAR(100),
+                    first_name VARCHAR(100),
+                    notification_enabled BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            cur.execute('''
+                INSERT INTO telegram_chats (chat_id, username, first_name, notification_enabled) 
+                VALUES (%s, %s, %s, TRUE) 
+                ON CONFLICT (chat_id) 
+                DO UPDATE SET 
+                    username = EXCLUDED.username, 
+                    first_name = EXCLUDED.first_name,
+                    notification_enabled = TRUE,
+                    created_at = CURRENT_TIMESTAMP
+            ''', (chat_id, username, first_name))
+            
+            conn.commit()
+            print(f"✅ Пользователь добавлен/обновлен: {chat_id} (@{username})")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Ошибка сохранения Telegram чата (попытка {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(1)
+        finally:
+            if conn:
+                conn.close()
+    
+    return False
 
 def send_telegram_message(chat_id, message, parse_mode='Markdown', reply_markup=None, retries=3):
     """Отправить сообщение в Telegram с повторными попытками"""
@@ -563,21 +587,34 @@ def get_user_status_message(chat_id):
     """Получить текстовое сообщение о статусе пользователя"""
     conn = get_db_connection()
     if not conn:
-        return "Неизвестно (ошибка базы данных)"
+        return "❓ Неизвестно (ошибка подключения к базе)"
         
     try:
         cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'telegram_chats'
+            )
+        """)
+        table_exists = cur.fetchone()[0]
+        
+        if not table_exists:
+            return "❓ Таблица не существует (отправьте /start)"
+        
         cur.execute('SELECT notification_enabled FROM telegram_chats WHERE chat_id = %s', (chat_id,))
         result = cur.fetchone()
         
         if result:
             status = result[0]
-            return "✅ Уведомления ВКЛЮЧЕНЫ (1)" if status else "❌ Уведомления ОТКЛЮЧЕНЫ (0)"
+            return "✅ Уведомления ВКЛЮЧЕНЫ" if status else "❌ Уведомления ОТКЛЮЧЕНЫ"
         else:
             return "❓ Не зарегистрирован (отправьте /start)"
+            
     except Exception as e:
         print(f"❌ Ошибка получения статуса пользователя: {e}")
-        return "Неизвестно (ошибка)"
+        return "❓ Ошибка получения статуса"
     finally:
         if conn:
             conn.close()
@@ -864,11 +901,13 @@ def telegram_webhook():
             chat_id = message['chat']['id']
             username = message['chat'].get('username')
             first_name = message['chat'].get('first_name', 'Пользователь')
-            text = message.get('text', '').strip().lower()
+            text = message.get('text', '').strip()
             
-            if text == '/start':
-                save_telegram_chat(chat_id, username, first_name)
-                welcome_message = f"""
+            text_lower = text.lower()
+            
+            if text_lower == '/start':
+                if save_telegram_chat(chat_id, username, first_name):
+                    welcome_message = f"""
 👋 *Добро пожаловать, {first_name}!*
 
 Вы подписались на уведомления о новых заявках с сайта бухгалтерских услуг.
@@ -876,24 +915,28 @@ def telegram_webhook():
 📋 *Доступные команды:*
 /stats - статистика заявок
 /today - заявки за сегодня
+/status - проверить статус
 /help - справка по командам
 /stop - отключить уведомления
 
 💡 *Быстрые действия:*
 Когда придёт новая заявка, вы увидите кнопки для быстрой обработки прямо в сообщении!
 
-✅ *Текущий статус:* Уведомления ВКЛЮЧЕНЫ (1)
-                """.strip()
+👤 *Текущий статус:* {get_user_status_message(chat_id)}
+                    """.strip()
+                else:
+                    welcome_message = "❌ Не удалось сохранить ваш профиль. Попробуйте еще раз или обратитесь к администратору."
+                
                 send_telegram_message(chat_id, welcome_message)
             
-            elif text == '/stop':
+            elif text_lower == '/stop':
                 if disable_telegram_notifications(chat_id):
-                    goodbye_message = """
+                    goodbye_message = f"""
 🔕 *Уведомления отключены*
 
 Вы больше не будете получать уведомления о новых заявках.
 
-❌ *Текущий статус:* Уведомления ОТКЛЮЧЕНЫ (0)
+👤 *Текущий статус:* {get_user_status_message(chat_id)}
 
 Чтобы снова включить уведомления, отправьте /start
                     """.strip()
@@ -902,23 +945,43 @@ def telegram_webhook():
                 
                 send_telegram_message(chat_id, goodbye_message)
             
-            elif text == '/stats':
+            elif text_lower == '/stats':
                 stats_message = get_stats_message()
                 send_telegram_message(chat_id, stats_message)
             
-            elif text == '/today':
+            elif text_lower == '/today':
                 today_message = get_today_requests_message()
                 send_telegram_message(chat_id, today_message)
             
-            elif text == '/help':
+            elif text_lower == '/status':
+                status_message = f"""
+👤 *ВАШ СТАТУС*
+
+{get_user_status_message(chat_id)}
+
+💡 *Информация:*
+Chat ID: `{chat_id}`
+Username: @{username or 'не указан'}
+Имя: {first_name}
+
+📋 *Команды:*
+/start - включить уведомления
+/stop - отключить уведомления  
+/stats - статистика заявок
+/today - заявки за сегодня
+                """.strip()
+                send_telegram_message(chat_id, status_message)
+            
+            elif text_lower == '/help':
                 help_message = f"""
 📚 *СПРАВКА ПО КОМАНДАМ*
 
 *Основные команды:*
-/start - подписаться на уведомления (статус 1)
-/stop - отключить уведомления (статус 0)
+/start - подписаться на уведомления
+/stop - отключить уведомления
 /stats - показать статистику заявок
 /today - показать заявки за сегодня
+/status - проверить ваш статус
 /help - эта справка
 
 *Интерактивные кнопки:*
@@ -936,18 +999,35 @@ def telegram_webhook():
                 send_telegram_message(chat_id, help_message)
             
             else:
-                unknown_message = f"""
+                if text.startswith('/'):
+                    unknown_message = f"""
 🤔 *Неизвестная команда*
 
 Используйте /help для списка доступных команд
 
-*Доступно:*
+*Доступные команды:*
+/start - включить уведомления
+/stop - отключить уведомления
 /stats - статистика
 /today - заявки за сегодня
+/status - ваш статус
 /help - справка
 
 👤 *Ваш статус:* {get_user_status_message(chat_id)}
-                """.strip()
+                    """.strip()
+                else:
+                    unknown_message = f"""
+💬 *Обработка сообщений*
+
+Я понимаю только команды. Отправьте /help для списка доступных команд.
+
+👤 *Ваш статус:* {get_user_status_message(chat_id)}
+
+💡 *Попробуйте:*
+/stats - посмотреть статистику заявок
+/today - заявки за сегодня
+                    """.strip()
+                
                 send_telegram_message(chat_id, unknown_message)
         
         elif 'callback_query' in data:
@@ -956,36 +1036,68 @@ def telegram_webhook():
             message_id = callback['message']['message_id']
             callback_data = callback['data']
             
-            action, request_id = callback_data.split('_', 1)
-            request_id = int(request_id)
-            
-            requests_list = load_requests()
-            current_request = next((r for r in requests_list if r['id'] == request_id), None)
-            
-            if not current_request:
-                answer_text = "❌ Заявка не найдена"
-            elif action == 'take':
-                if update_request_status(request_id, 'в работе'):
-                    answer_text = f"✅ Заявка #{request_id} взята в работу"
-                else:
-                    answer_text = "❌ Ошибка обновления статуса"
-            
-            elif action == 'contact':
-                answer_text = f"📞 Контакты клиента:\n{current_request['phone']}\n{current_request['email']}"
-            
-            elif action == 'urgent':
-                answer_text = f"⚡ Заявка #{request_id} отмечена как срочная"
-            
-            elif action == 'complete':
-                if update_request_status(request_id, 'завершена'):
-                    answer_text = f"✔️ Заявка #{request_id} завершена"
-                else:
-                    answer_text = "❌ Ошибка обновления статуса"
-            
-            else:
-                answer_text = "❓ Неизвестное действие"
-            
             try:
+                action, request_id = callback_data.split('_', 1)
+                request_id = int(request_id)
+                
+                requests_list = load_requests()
+                current_request = next((r for r in requests_list if r['id'] == request_id), None)
+                
+                if not current_request:
+                    answer_text = "❌ Заявка не найдена"
+                elif action == 'take':
+                    if update_request_status(request_id, 'в работе'):
+                        answer_text = f"✅ Заявка #{request_id} взята в работу"
+                        try:
+                            edit_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageText"
+                            edit_payload = {
+                                'chat_id': chat_id,
+                                'message_id': message_id,
+                                'text': callback['message']['text'] + f"\n\n✅ *Взята в работу пользователем {callback['from'].get('first_name', 'администратором')}*",
+                                'parse_mode': 'Markdown',
+                                'reply_markup': callback['message'].get('reply_markup', {'inline_keyboard': []})
+                            }
+                            requests.post(edit_url, json=edit_payload, timeout=10)
+                        except Exception as e:
+                            print(f"⚠️ Не удалось обновить сообщение: {e}")
+                    else:
+                        answer_text = "❌ Ошибка обновления статуса"
+                
+                elif action == 'contact':
+                    answer_text = f"📞 *Контакты клиента:*\nТелефон: `{current_request['phone']}`\nEmail: `{current_request['email']}`"
+                
+                elif action == 'urgent':
+                    answer_text = f"⚡ Заявка #{request_id} отмечена как срочная"
+                
+                elif action == 'complete':
+                    if update_request_status(request_id, 'завершена'):
+                        answer_text = f"✔️ Заявка #{request_id} завершена"
+                        try:
+                            edit_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup"
+                            edit_payload = {
+                                'chat_id': chat_id,
+                                'message_id': message_id,
+                                'reply_markup': {'inline_keyboard': []}
+                            }
+                            requests.post(edit_url, json=edit_payload, timeout=10)
+                            
+                            edit_text_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageText"
+                            edit_text_payload = {
+                                'chat_id': chat_id,
+                                'message_id': message_id,
+                                'text': callback['message']['text'] + f"\n\n✔️ *Завершена пользователем {callback['from'].get('first_name', 'администратором')}*",
+                                'parse_mode': 'Markdown',
+                                'reply_markup': {'inline_keyboard': []}
+                            }
+                            requests.post(edit_text_url, json=edit_text_payload, timeout=10)
+                        except Exception as e:
+                            print(f"⚠️ Не удалось обновить сообщение: {e}")
+                    else:
+                        answer_text = "❌ Ошибка обновления статуса"
+                
+                else:
+                    answer_text = "❓ Неизвестное действие"
+                
                 url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/answerCallbackQuery"
                 payload = {
                     'callback_query_id': callback['id'],
@@ -994,17 +1106,25 @@ def telegram_webhook():
                 }
                 requests.post(url, json=payload, timeout=10)
                 
-                if action == 'complete':
-                    edit_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup"
-                    edit_payload = {
-                        'chat_id': chat_id,
-                        'message_id': message_id,
-                        'reply_markup': {'inline_keyboard': []}
-                    }
-                    requests.post(edit_url, json=edit_payload, timeout=10)
-                    
+            except ValueError:
+                answer_text = "❌ Ошибка обработки запроса"
+                url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/answerCallbackQuery"
+                payload = {
+                    'callback_query_id': callback['id'],
+                    'text': answer_text,
+                    'show_alert': False
+                }
+                requests.post(url, json=payload, timeout=10)
             except Exception as e:
                 print(f"❌ Ошибка обработки callback: {e}")
+                answer_text = "❌ Произошла ошибка при обработке"
+                url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/answerCallbackQuery"
+                payload = {
+                    'callback_query_id': callback['id'],
+                    'text': answer_text,
+                    'show_alert': False
+                }
+                requests.post(url, json=payload, timeout=10)
         
         return jsonify({'status': 'ok'})
         
@@ -1115,6 +1235,81 @@ def telegram_setup_manual():
     </body>
     </html>
     '''
+
+@app.route('/admin/fix-database')
+@login_required
+def fix_database():
+    """Принудительное исправление базы данных"""
+    conn = get_db_connection()
+    if not conn:
+        flash('❌ Не удалось подключиться к базе данных', 'error')
+        return redirect(url_for('admin_panel'))
+    
+    try:
+        cur = conn.cursor()
+        
+        # Создаем таблицу telegram_chats
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS telegram_chats (
+                id SERIAL PRIMARY KEY,
+                chat_id BIGINT UNIQUE NOT NULL,
+                username VARCHAR(100),
+                first_name VARCHAR(100),
+                notification_enabled BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Создаем таблицу requests
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS requests (
+                id SERIAL PRIMARY KEY,
+                client_id UUID NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                phone VARCHAR(20) NOT NULL,
+                service_type VARCHAR(50) NOT NULL,
+                company_type VARCHAR(50),
+                message TEXT,
+                urgency VARCHAR(20) DEFAULT 'standard',
+                date VARCHAR(50) NOT NULL,
+                status VARCHAR(20) DEFAULT 'новая',
+                assigned_to VARCHAR(100) DEFAULT '',
+                notes TEXT DEFAULT '',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS clients (
+                id UUID PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) NOT NULL,
+                phone VARCHAR(20) NOT NULL,
+                company_type VARCHAR(50),
+                created_date VARCHAR(50) NOT NULL,
+                requests_count INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        conn.commit()
+        
+        cur.execute('SELECT COUNT(*) FROM telegram_chats')
+        chat_count = cur.fetchone()[0]
+        
+        cur.execute('SELECT COUNT(*) FROM requests')
+        request_count = cur.fetchone()[0]
+        
+        flash(f'✅ База данных исправлена. Чатов: {chat_count}, Заявок: {request_count}', 'success')
+        
+    except Exception as e:
+        flash(f'❌ Ошибка исправления базы данных: {e}', 'error')
+    finally:
+        if conn:
+            conn.close()
+    
+    return redirect(url_for('admin_panel'))
 
 @app.route('/admin/setup-telegram-webhook')
 @login_required
