@@ -89,17 +89,30 @@ def set_telegram_webhook():
 def get_db_connection():
     """Создать соединение с Neon database используя pg8000"""
     try:
+        host = os.environ.get('PGHOST', 'ep-tiny-lab-agdp3p2o-pooler.c-2.eu-central-1.aws.neon.tech')
+        port = int(os.environ.get('PGPORT', 5432))
+        user = os.environ.get('PGUSER', 'neondb_owner')
+        password = os.environ.get('PGPASSWORD', 'npg_EDzFntuY13CI')
+        database = os.environ.get('PGDATABASE', 'neondb')
+        
+        print(f"🔄 Подключение к БД: {host}:{port}/{database} as {user}")
+        
         conn = pg8000.connect(
-            host=os.environ.get('PGHOST', 'ep-tiny-lab-agdp3p2o-pooler.c-2.eu-central-1.aws.neon.tech'),
-            port=5432,
-            user=os.environ.get('PGUSER', 'neondb_owner'),
-            password=os.environ.get('PGPASSWORD', 'npg_EDzFntuY13CI'),
-            database=os.environ.get('PGDATABASE', 'neondb'),
-            ssl_context=True
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database,
+            ssl_context=True,
+            timeout=10
         )
+        
+        print("✅ Соединение с БД установлено")
         return conn
     except Exception as e:
-        print(f"❌ Ошибка подключения к базе данных: {e}")
+        print(f"❌ Ошибка подключения к базе данных: {type(e).__name__}: {e}")
+        import traceback
+        print(traceback.format_exc())
         return None
 
 def init_db():
@@ -231,6 +244,7 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
     for attempt in range(max_retries):
         conn = None
         try:
+            print(f"🔄 Попытка {attempt + 1} сохранения чата {chat_id}")
             conn = get_db_connection()
             if not conn:
                 print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
