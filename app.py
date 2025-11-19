@@ -295,7 +295,6 @@ def get_stats_message():
         today_requests = [r for r in requests_list if datetime.strptime(r['date'], '%d.%m.%Y %H:%M:%S').date() == today]
         
         new_count = len([r for r in requests_list if r['status'] == 'новая'])
-        in_progress_count = len([r for r in requests_list if r['status'] == 'в работе'])
         completed_count = len([r for r in requests_list if r['status'] == 'завершена'])
         
         message = f"""
@@ -306,15 +305,8 @@ def get_stats_message():
 📈 *Общая статистика:*
 • Всего заявок: {len(requests_list)}
 • 🆕 Новые: {new_count}
-• 🔄 В работе: {in_progress_count}
 • ✅ Завершено: {completed_count}
 
-👥 *Клиенты:*
-• Всего клиентов: {len(clients)}
-• Повторных обращений: {len([c for c in clients if c.get('requests_count', 0) > 1])}
-
-🤖 *Telegram:*
-• Активных подписчиков: {len(load_telegram_chats())}
         """.strip()
         
         return message
@@ -334,7 +326,7 @@ def get_today_requests_message():
         
         message = f"📅 *ЗАЯВКИ ЗА СЕГОДНЯ* ({len(today_requests)})\n\n"
         
-        for idx, req in enumerate(today_requests[:10], 1):  # Показываем максимум 10
+        for idx, req in enumerate(today_requests[:10], 1): 
             service_name = SERVICES.get(req['service_type'], {}).get('name', req['service_type'])
             status_emoji = {'новая': '🆕', 'в работе': '🔄', 'завершена': '✅'}.get(req['status'], '📋')
             
