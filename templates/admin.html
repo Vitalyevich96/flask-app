@@ -341,7 +341,7 @@
             <td>
                 <div class="action-buttons">
                     {% if req.status == 'новая' %}
-                    <form method="POST" action="/admin/update-status/{{ req.id }}?status=completed" style="display:inline;">
+                    <form method="POST" action="/admin/update-status/{{ req.id }}/completed" style="display:inline;">
                         <button type="submit" class="btn-small btn-complete" onclick="event.stopPropagation()">Завершить</button>
                     </form>
                     {% endif %}
