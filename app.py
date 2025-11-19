@@ -95,8 +95,6 @@ def get_db_connection():
         password = os.environ.get('PGPASSWORD', 'npg_EDzFntuY13CI')
         database = os.environ.get('PGDATABASE', 'neondb')
         
-        print(f"🔄 Подключение к БД: {host}:{port}/{database} as {user}")
-        
         conn = pg8000.connect(
             host=host,
             port=port,
@@ -107,13 +105,64 @@ def get_db_connection():
             timeout=10
         )
         
-        print("✅ Соединение с БД установлено")
         return conn
     except Exception as e:
         print(f"❌ Ошибка подключения к базе данных: {type(e).__name__}: {e}")
+        return None 
+
+def ensure_telegram_chats_schema():
+    """Убедиться, что таблица telegram_chats имеет правильную структуру"""
+    conn = get_db_connection()
+    if not conn:
+        print("❌ Не удалось подключиться для проверки схемы")
+        return False
+    
+    try:
+        cur = conn.cursor()
+        
+        # Создать таблицу если не существует
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS telegram_chats (
+                id SERIAL PRIMARY KEY,
+                chat_id BIGINT UNIQUE NOT NULL,
+                notification_enabled BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        conn.commit()
+        
+        # Проверить существующие колонки
+        cur.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'telegram_chats'
+        """)
+        existing_columns = [row[0] for row in cur.fetchall()]
+        print(f"📋 Существующие колонки: {existing_columns}")
+        
+        # Добавить недостающие колонки
+        if 'username' not in existing_columns:
+            print("➕ Добавляю колонку username")
+            cur.execute('ALTER TABLE telegram_chats ADD COLUMN username VARCHAR(100)')
+            conn.commit()
+        
+        if 'first_name' not in existing_columns:
+            print("➕ Добавляю колонку first_name")
+            cur.execute('ALTER TABLE telegram_chats ADD COLUMN first_name VARCHAR(100)')
+            conn.commit()
+        
+        cur.close()
+        print("✅ Схема таблицы telegram_chats проверена и обновлена")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Ошибка обновления схемы: {type(e).__name__}: {e}")
         import traceback
         print(traceback.format_exc())
-        return None
+        return False
+    finally:
+        if conn:
+            conn.close()
 
 def init_db():
     """Инициализировать таблицы в базе данных"""
@@ -245,6 +294,11 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
         conn = None
         try:
             print(f"🔄 Попытка {attempt + 1} сохранения чата {chat_id}")
+            
+            # При первой попытке проверяем схему
+            if attempt == 0:
+                ensure_telegram_chats_schema()
+            
             conn = get_db_connection()
             if not conn:
                 print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
@@ -253,19 +307,6 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
                 continue
             
             cur = conn.cursor()
-            
-            # Создать таблицу если не существует
-            cur.execute('''
-                CREATE TABLE IF NOT EXISTS telegram_chats (
-                    id SERIAL PRIMARY KEY,
-                    chat_id BIGINT UNIQUE NOT NULL,
-                    username VARCHAR(100),
-                    first_name VARCHAR(100),
-                    notification_enabled BOOLEAN DEFAULT TRUE,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
-            conn.commit()
             
             # Преобразовать chat_id в integer явно
             chat_id_int = int(chat_id)
@@ -283,16 +324,18 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
                         notification_enabled = TRUE
                     WHERE chat_id = %s
                 ''', (username, first_name, chat_id_int))
+                print(f"✅ Обновлена запись для chat_id: {chat_id}")
             else:
                 # Вставить новую запись
                 cur.execute('''
                     INSERT INTO telegram_chats (chat_id, username, first_name, notification_enabled) 
                     VALUES (%s, %s, %s, TRUE)
                 ''', (chat_id_int, username, first_name))
+                print(f"✅ Создана новая запись для chat_id: {chat_id}")
             
             conn.commit()
             cur.close()
-            print(f"✅ Пользователь добавлен/обновлен: {chat_id} (@{username})")
+            print(f"✅ Пользователь сохранен: {chat_id} (@{username})")
             return True
             
         except Exception as e:
@@ -1490,6 +1533,16 @@ def sitemap():
 @app.route('/robots.txt')
 def robots():
     return send_from_directory('.', 'robots.txt')
+
+@app.route('/admin/fix-telegram-table')
+@login_required
+def fix_telegram_table():
+    """Исправить структуру таблицы telegram_chats"""
+    if ensure_telegram_chats_schema():
+        flash('✅ Таблица telegram_chats успешно исправлена', 'success')
+    else:
+        flash('❌ Ошибка исправления таблицы', 'error')
+    return redirect(url_for('admin_panel'))
 
 if __name__ == '__main__':
     app.run(debug=True)
