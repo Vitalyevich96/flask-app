@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Внутренняя ошибка сервера{% endblock %}
+
+{% block description %}Произошла внутренняя ошибка сервера. Пожалуйста, попробуйте позже.{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 80px 20px;">
+    <h1 style="font-size: 4em; color: #dc3545; margin-bottom: 20px;">500</h1>
+    <h2 style="color: #333; margin-bottom: 20px;">Внутренняя ошибка сервера</h2>
+    <p style="color: #666; margin-bottom: 30px; font-size: 1.1em;">
+        Произошла внутренняя ошибка сервера. Пожалуйста, попробуйте позже.
+    </p>
+    <a href="/" style="display: inline-block; background: #007bff; color: white;
+                      padding: 12px 30px; text-decoration: none; border-radius: 8px;
+                      font-weight: 600; transition: all 0.3s;">
+        Вернуться на главную
+    </a>
+</div>
+{% endblock %}

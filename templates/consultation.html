@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Заявка на консультацию{% endblock %}
+{% block title %}Заявка на бухгалтерскую консультацию{% endblock %}
+
+{% block description %}Оставьте заявку на бесплатную бухгалтерскую консультацию в Актобе. Профессиональные услуги по ведению учёта, налоговой отчётности и оптимизации.{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* PAGE HEADER */
     .page-header {
         text-align: center;
         margin-bottom: 50px;
@@ -25,7 +26,6 @@
             line-height: 1.6;
         }
 
-    /* FORM CONTAINER */
     .form-container {
         background: white;
         padding: 45px;
@@ -51,7 +51,6 @@
         font-size: 1.05em;
     }
 
-    /* FORM ELEMENTS */
     .form-group {
         margin-bottom: 24px;
     }
@@ -113,7 +112,6 @@
             padding-right: 40px;
         }
 
-    /* HELP TEXT */
     .help-text {
         font-size: 0.9em;
         color: #777;
@@ -121,7 +119,6 @@
         display: block;
     }
 
-    /* BUTTON */
     .submit-btn {
         width: 100%;
         padding: 16px;
@@ -146,7 +143,6 @@
             transform: translateY(-1px);
         }
 
-    /* BENEFITS SECTION */
     .form-benefits {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -172,7 +168,6 @@
             font-weight: 500;
         }
 
-    /* INFO BOX */
     .info-box {
         background: linear-gradient(135deg, #e4f2ff 0%, #f8f9ff 100%);
         padding: 20px 24px;
@@ -191,7 +186,6 @@
             color: #007bff;
         }
 
-    /* MOBILE */
     @media (max-width: 768px) {
         .page-header h1 {
             font-size: 2em;
@@ -222,11 +216,10 @@
         .form-group textarea,
         .form-group select {
             padding: 14px;
-            font-size: 16px; /* Prevent zoom on iOS */
+            font-size: 16px;
         }
     }
 
-    /* Validation styles */
     .form-group input:invalid:not(:placeholder-shown),
     .form-group textarea:invalid:not(:placeholder-shown),
     .form-group select:invalid:not(:placeholder-shown) {
@@ -289,7 +282,7 @@
             <select id="service_type" name="service_type" required>
                 <option value="" disabled selected>Выберите услугу</option>
                 {% for key, service in services.items() %}
-                <option value="{{ key }}">{{ service.name }} — {{ service.price_range }}</option>
+                <option value="{{ key }}">{{ service.name }} — {{ service.price }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -345,9 +338,8 @@
 </div>
 
 <script>
-    // Phone mask formatting
     const phoneInput = document.getElementById('phone');
-    phoneInput.addEventListener('input', function(e) {
+    phoneInput.addEventListener('input', function (e) {
         let value = e.target.value.replace(/\D/g, '');
         if (value.startsWith('7') || value.startsWith('8')) {
             value = value.substring(1);
@@ -362,9 +354,8 @@
         }
     });
 
-    // Form validation feedback
     const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', function (e) {
         const requiredFields = form.querySelectorAll('[required]');
         let isValid = true;
 
@@ -381,9 +372,8 @@
         }
     });
 
-    // Reset border color on input
     document.querySelectorAll('input, textarea, select').forEach(field => {
-        field.addEventListener('input', function() {
+        field.addEventListener('input', function () {
             if (this.value.trim()) {
                 this.style.borderColor = '';
             }

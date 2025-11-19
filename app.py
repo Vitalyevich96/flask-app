@@ -9,7 +9,6 @@ import uuid
 import requests
 import pg8000
 
-# Определение услуг
 SERVICES = {
     'accounting': {
         'name': 'Бухгалтерское обслуживание',
@@ -47,7 +46,6 @@ SERVICES = {
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
 
-# Neon Database configuration - используем ваш connection string
 DATABASE_URL = os.environ.get('POSTGRES_URL', 'postgresql://neondb_owner:npg_EDzFntuY13CI@ep-tiny-lab-agdp3p2o-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require')
 
 ADMIN_LOGIN = 'admin'
@@ -55,11 +53,9 @@ ADMIN_PASSWORD = 'admin1802'
 
 TELEGRAM_BOT_TOKEN = '7561142289:AAFVFusO4EQqxsz4-oDJjVHUPEfhIarlAcs'
 
-# Функция для настройки Telegram webhook
 def set_telegram_webhook():
     """Настроить webhook для Telegram бота"""
     try:
-        # Получаем URL приложения из переменных окружения или используем дефолтный
         app_url = os.environ.get('APP_URL', 'https://buhgalter-aktobe.vercel.app')
         webhook_url = f"{app_url}/telegram-webhook"
         
@@ -85,7 +81,6 @@ def set_telegram_webhook():
 def get_db_connection():
     """Создать соединение с Neon database используя pg8000"""
     try:
-        # Используем переменные окружения от Neon
         conn = pg8000.connect(
             host=os.environ.get('PGHOST', 'ep-tiny-lab-agdp3p2o-pooler.c-2.eu-central-1.aws.neon.tech'),
             port=5432,
@@ -109,7 +104,6 @@ def init_db():
     try:
         cur = conn.cursor()
         
-        # Таблица для заявок
         cur.execute('''
             CREATE TABLE IF NOT EXISTS requests (
                 id SERIAL PRIMARY KEY,
@@ -129,7 +123,6 @@ def init_db():
             )
         ''')
         
-        # Таблица для клиентов
         cur.execute('''
             CREATE TABLE IF NOT EXISTS clients (
                 id UUID PRIMARY KEY,
@@ -143,7 +136,6 @@ def init_db():
             )
         ''')
         
-        # Таблица для Telegram подписчиков
         cur.execute('''
             CREATE TABLE IF NOT EXISTS telegram_chats (
                 id SERIAL PRIMARY KEY,
@@ -161,7 +153,6 @@ def init_db():
         if conn:
             conn.close()
 
-# Инициализируем базу при старте
 init_db()
 
 def load_telegram_chats():
@@ -265,19 +256,16 @@ def save_client(client_data):
     try:
         cur = conn.cursor()
         
-        # Проверяем существующего клиента
         cur.execute('SELECT id, requests_count FROM clients WHERE email = %s', (client_data['email'],))
         existing_client = cur.fetchone()
         
         if existing_client:
-            # Обновляем счетчик заявок
             cur.execute(
                 'UPDATE clients SET requests_count = requests_count + 1 WHERE id = %s',
                 (existing_client[0],)
             )
             client_id = existing_client[0]
         else:
-            # Создаем нового клиента
             client_id = client_data['id']
             cur.execute(
                 'INSERT INTO clients (id, name, email, phone, company_type, created_date, requests_count) VALUES (%s, %s, %s, %s, %s, %s, %s)',
@@ -338,10 +326,8 @@ def load_requests():
         cur.execute('SELECT * FROM requests ORDER BY created_at DESC')
         rows = cur.fetchall()
         
-        # Получаем названия колонок
         column_names = [desc[0] for desc in cur.description]
         
-        # Конвертируем в dict
         requests_list = []
         for row in rows:
             request_dict = {}
@@ -438,7 +424,9 @@ def index():
 @app.route('/services')
 def services():
     """Страница с описанием услуг"""
-    return render_template('services.html', services=SERVICES)
+    return render_template('services.html', 
+                         services=SERVICES,
+                         meta_description="Полный перечень бухгалтерских услуг: ведение учёта, налоговая отчётность, аудит, регистрация бизнеса. Профессиональные решения для вашего бизнеса.")
 
 @app.route('/consultation', methods=['GET', 'POST'])
 def consultation():
@@ -456,7 +444,6 @@ def consultation():
             flash('Пожалуйста, заполните все обязательные поля', 'error')
             return redirect(url_for('consultation'))
         
-        # Сохраняем клиента
         client_id = str(uuid.uuid4())
         new_client = {
             'id': client_id,
@@ -469,7 +456,6 @@ def consultation():
         }
         save_client(new_client)
         
-        # Сохраняем заявку
         new_request = {
             'client_id': client_id,
             'name': name,
@@ -487,7 +473,6 @@ def consultation():
         request_id = save_request(new_request)
         
         if request_id:
-            # Отправляем уведомление в Telegram
             try:
                 new_request['id'] = request_id
                 send_telegram_notification(new_request)
@@ -505,12 +490,15 @@ def consultation():
 @app.route('/pricing')
 def pricing():
     """Страница с ценами"""
-    return render_template('pricing.html', services=SERVICES)
+    return render_template('pricing.html', 
+                         services=SERVICES,
+                         meta_description="Прозрачные цены на бухгалтерские услуги в Актобе. Тарифы для ИП и ТОО. Бесплатная консультация и индивидуальный расчёт.")
 
 @app.route('/about')
 def about():
     """Страница о компании"""
-    return render_template('about.html')
+    return render_template('about.html',
+                         meta_description="Бухгалтер Гусева Юлия - профессиональные услуги с опытом 20+ лет. Надёжное ведение бухгалтерии для бизнеса в Актобе и Казахстане.")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -534,18 +522,14 @@ def admin_panel():
     """Админ панель с заявками"""
     status_filter = request.args.get('status', '')
     
-    # Загружаем заявки из базы данных
     requests_list = load_requests()
     
-    # Фильтрация по статусу
     if status_filter:
         requests_list = [r for r in requests_list if r['status'] == status_filter]
-    
-    # Статистика
+
     stats = {
         'total': len(requests_list),
         'new': len([r for r in requests_list if r['status'] == 'новая']),
-        'in_progress': len([r for r in requests_list if r['status'] == 'в_процессе']),
         'completed': len([r for r in requests_list if r['status'] == 'завершена'])
     }
     
@@ -569,7 +553,8 @@ def delete_request(request_id):
 @login_required
 def update_status(request_id, status):
     """Обновить статус заявки"""
-    valid_statuses = ['новая', 'в_процессе', 'завершена']
+    valid_statuses = ['новая', 'завершена']
+    
     if status not in valid_statuses:
         flash('Неверный статус', 'error')
         return redirect(url_for('admin_panel'))
@@ -630,10 +615,8 @@ def export_requests(year, month):
     output = StringIO()
     writer = csv.writer(output)
     
-    # Заголовки
     writer.writerow(['ID', 'Имя', 'Email', 'Телефон', 'Услуга', 'Тип компании', 'Сообщение', 'Дата', 'Статус'])
-    
-    # Данные
+
     for req in requests_list:
         writer.writerow([
             req['id'],
@@ -666,7 +649,6 @@ def api_stats():
         'requests': {
             'total': len(requests_list),
             'new': len([r for r in requests_list if r['status'] == 'новая']),
-            'in_progress': len([r for r in requests_list if r['status'] == 'в_процессе']),
             'completed': len([r for r in requests_list if r['status'] == 'завершена'])
         },
         'clients': {
@@ -695,7 +677,6 @@ def telegram_webhook():
             
             if text == '/start':
                 save_telegram_chat(chat_id)
-                # Отправить подтверждение
                 try:
                     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
                     payload = {
@@ -709,10 +690,8 @@ def telegram_webhook():
                     print(f"❌ Ошибка отправки приветствия: {e}")
                     
             elif text == '/stop':
-                # Удалить из рассылки
                 chats = load_telegram_chats()
                 if chat_id in chats:
-                    # Удаляем из базы данных
                     conn = get_db_connection()
                     if conn:
                         cur = conn.cursor()
@@ -732,7 +711,6 @@ def telegram_webhook():
                 except Exception as e:
                     print(f"❌ Ошибка отправки сообщения об отписке: {e}")
             else:
-                # Ответ на неизвестные команды
                 try:
                     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
                     payload = {
@@ -791,30 +769,18 @@ def setup_telegram_webhook():
         flash('Ошибка настройки webhook', 'error')
     return redirect(url_for('admin_panel'))
 
-# Добавьте этот маршрут для favicon
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                             'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-# Добавить обработку ошибок
 @app.errorhandler(404)
 def not_found_error(error):
-    if request.path == '/favicon.ico':
-        return '', 204
     return render_template('404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    return """
-    <html>
-        <head><title>Ошибка сервера</title></head>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-            <h1 style="color: #dc3545;">500 - Ошибка сервера</h1>
-            <p>Произошла внутренняя ошибка сервера. Пожалуйста, попробуйте позже.</p>
-            <a href="/" style="color: #007bff;">Вернуться на главную</a>
-        </body>
-    </html>
-    """, 500
+    return render_template('500.html'), 500
 
 @app.route('/googleddd09674c4d97235.html')
 def google_verification():

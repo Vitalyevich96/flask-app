@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Админ панель - Заявки{% endblock %}
+{% block title %}Админ панель - Управление заявками{% endblock %}
+
+{% block description %}Панель администратора для управления заявками на бухгалтерские услуги. Просмотр, обработка и отслеживание клиентских обращений.{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -104,16 +106,6 @@
         white-space: nowrap;
     }
 
-    .status-in_progress {
-        background-color: #fff3e0;
-        color: #ef6c00;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.85em;
-        font-weight: 500;
-        white-space: nowrap;
-    }
-
     .status-completed {
         background-color: #e8f5e8;
         color: #2e7d32;
@@ -132,35 +124,52 @@
     }
 
     .btn-small {
-        padding: 6px 12px;
+        padding: 8px 16px;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 0.85em;
+        font-size: 0.9em;
         text-decoration: none;
         display: inline-block;
         transition: all 0.2s;
         white-space: nowrap;
         flex-shrink: 0;
-    }
-
-    .btn-process {
-        background: linear-gradient(135deg, #ffc107, #ff9800);
-        color: white;
         font-weight: 600;
+        text-align: center;
     }
 
     .btn-complete {
         background: linear-gradient(135deg, #28a745, #20c997);
         color: white;
-        font-weight: 600;
     }
+
+        .btn-complete:hover {
+            background: linear-gradient(135deg, #218838, #1e9e8a);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
 
     .btn-delete {
         background: linear-gradient(135deg, #dc3545, #c82333);
         color: white;
-        font-weight: 600;
     }
+
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+    }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496, #117a8b);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+        }
 
     .empty-message {
         text-align: center;
@@ -276,10 +285,6 @@
         <span>Новых</span>
     </div>
     <div class="stat-card">
-        <span class="stat-number">{{ stats.in_progress }}</span>
-        <span>В процессе</span>
-    </div>
-    <div class="stat-card">
         <span class="stat-number">{{ stats.completed }}</span>
         <span>Завершено</span>
     </div>
@@ -290,15 +295,6 @@
 </div>
 
 <div class="admin-controls">
-    <div class="filters">
-        <select class="filter-select" onchange="location = this.value;">
-            <option value="/admin">Все статусы</option>
-            <option value="/admin?status=новая">Только новые</option>
-            <option value="/admin?status=в_процессе">В процессе</option>
-            <option value="/admin?status=завершена">Завершённые</option>
-        </select>
-    </div>
-
     <div class="filters">
         <a href="/admin/setup-telegram-webhook" class="btn-small btn-info"
            onclick="return confirm('Настроить webhook для Telegram?')">
@@ -338,8 +334,6 @@
             <td>
                 {% if req.status == 'новая' %}
                 <span class="status-new">Новая</span>
-                {% elif req.status == 'в_процессе' %}
-                <span class="status-in_progress">В процессе</span>
                 {% elif req.status == 'завершена' %}
                 <span class="status-completed">Завершена</span>
                 {% endif %}
@@ -347,10 +341,6 @@
             <td>
                 <div class="action-buttons">
                     {% if req.status == 'новая' %}
-                    <form method="POST" action="/admin/update-status/{{ req.id }}/в_процессе" style="display:inline;">
-                        <button type="submit" class="btn-small btn-process" onclick="event.stopPropagation()">В процессе</button>
-                    </form>
-                    {% elif req.status == 'в_процессе' %}
                     <form method="POST" action="/admin/update-status/{{ req.id }}/завершена" style="display:inline;">
                         <button type="submit" class="btn-small btn-complete" onclick="event.stopPropagation()">Завершить</button>
                     </form>
@@ -381,42 +371,34 @@
         </div>
 
         <div class="request-details">
-
             <div class="detail-item">
                 <div class="detail-label">Имя:</div>
                 <div class="detail-value" id="modalNameDetail"></div>
             </div>
-
             <div class="detail-item">
                 <div class="detail-label">Email:</div>
                 <div class="detail-value" id="modalEmail"></div>
             </div>
-
             <div class="detail-item">
                 <div class="detail-label">Телефон:</div>
                 <div class="detail-value" id="modalPhone"></div>
             </div>
-
             <div class="detail-item">
                 <div class="detail-label">Услуга:</div>
                 <div class="detail-value" id="modalService"></div>
             </div>
-
             <div class="detail-item">
                 <div class="detail-label">Тип компании:</div>
                 <div class="detail-value" id="modalCompanyType"></div>
             </div>
-
             <div class="detail-item">
                 <div class="detail-label">Срочность:</div>
                 <div class="detail-value" id="modalUrgency"></div>
             </div>
-
             <div class="detail-item">
                 <div class="detail-label">Дата заявки:</div>
                 <div class="detail-value" id="modalDate"></div>
             </div>
-
             <div class="message-section">
                 <div class="detail-label">Сообщение:</div>
                 <div class="detail-value message-content" id="modalMessage"></div>
@@ -428,7 +410,6 @@
 
 {% block extra_js %}
 <script>
-
     function openRequestModal(rowElement) {
         try {
             const jsonText = rowElement.getAttribute('data-request');
@@ -459,8 +440,6 @@
 
             if (request.status === 'новая')
                 statusElement.innerHTML = '<span class="status-new">Новая</span>';
-            else if (request.status === 'в_процессе')
-                statusElement.innerHTML = '<span class="status-in_progress">В процессе</span>';
             else if (request.status === 'завершена')
                 statusElement.innerHTML = '<span class="status-completed">Завершена</span>';
 
@@ -501,6 +480,5 @@
             document.getElementById('telegramSubscribers').textContent =
                 data.telegram_subscribers || 0;
         });
-
 </script>
 {% endblock %}

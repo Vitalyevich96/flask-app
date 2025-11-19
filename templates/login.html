@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Вход в систему{% endblock %}
+{% block title %}Вход в админ панель{% endblock %}
+
+{% block description %}Страница входа в систему управления заявками на бухгалтерские услуги.{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Login Wrapper */
     .login-container {
         background: white;
         padding: 40px;
@@ -23,7 +24,6 @@
             margin-bottom: 30px;
         }
 
-    /* Input Groups */
     .form-group {
         margin-bottom: 20px;
     }
@@ -50,7 +50,6 @@
                 outline: none;
             }
 
-    /* Button */
     .submit-btn {
         width: 100%;
         padding: 12px;
@@ -69,7 +68,6 @@
             background: linear-gradient(135deg, #00c4b5, #1a63ff);
         }
 
-    /* Subtle fade-in */
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -82,7 +80,6 @@
         }
     }
 
-    /* Responsive */
     @media (max-width: 500px) {
         .login-container {
             margin: 40px 20px;

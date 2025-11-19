@@ -33,6 +33,7 @@
     <Content Include="requirements.txt" />
     <Content Include="static\favicon.ico" />
     <Content Include="templates\404.html" />
+    <Content Include="templates\500.html" />
     <Content Include="templates\admin.html" />
     <Content Include="templates\base.html" />
     <Content Include="templates\consultation.html" />

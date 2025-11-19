@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Бухгалтер - Гусева Юлия{% endblock %}
+{% block title %}Бухгалтерские услуги в Актобе - Гусева Юлия{% endblock %}
+
+{% block description %}Профессиональный бухгалтер в Актобе. Полное бухгалтерское сопровождение бизнеса, налоговая отчётность, регистрация ИП и ТОО. Опыт 20+ лет. Бесплатная консультация.{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* COMMON ELEMENTS */
-
     h1, h2, h3, h4 {
         color: #007bff;
         font-weight: 600;
@@ -87,22 +87,6 @@
         position: relative;
     }
 
-        .hero h1::before {
-            content: attr(data-text);
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, #ffffff, #b2f7ff);
-            -webkit-mask-image: linear-gradient(90deg, #fff, #fff);
-            mask-image: linear-gradient(90deg, #fff, #fff);
-            -webkit-mask-clip: text;
-            mask-clip: text;
-            -webkit-mask-composite: intersect;
-            mask-composite: intersect;
-            color: transparent;
-        }
-
-
-
     .hero p {
         font-size: 1.3em;
         margin-bottom: 16px;
@@ -152,10 +136,10 @@
     }
 
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
 
     .btn-secondary {
         background: transparent;
@@ -169,7 +153,6 @@
             transform: translateY(-3px);
         }
 
-    /* STATS */
     .stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -218,7 +201,6 @@
             }
     }
 
-    /* SERVICES */
     #services {
         scroll-margin-top: 100px;
     }
@@ -297,7 +279,7 @@
         .service-card .price {
             font-size: 1.2em;
             font-weight: 700;
-            color: #ff6b6b;
+            color: #359C3C;
             margin: 10px 0 16px 0;
         }
 
@@ -332,7 +314,6 @@
                     font-size: 1.2em;
                 }
 
-    /* FEATURES */
     .features {
         background: linear-gradient(135deg, #f8faff 0%, #e4f2ff 100%);
         padding: 90px 24px;
@@ -449,7 +430,6 @@
             max-width: 280px;
         }
 
-    /* Mobile adjustments */
     @media (max-width: 768px) {
         .features {
             padding: 70px 20px;
@@ -471,34 +451,12 @@
             }
     }
 
-
-    /* PRICING */
     #pricing {
         max-width: 1200px;
         margin: 0 auto;
         scroll-margin-top: 100px;
         position: relative;
     }
-
-    .section-header {
-        text-align: center;
-        margin-bottom: 60px;
-    }
-
-        .section-header h2 {
-            font-size: 2.5em;
-            color: #007bff;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .section-header p {
-            font-size: 1.15em;
-            color: #666;
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.7;
-        }
 
     .pricing-tables {
         display: grid;
@@ -576,25 +534,22 @@
 
     .pricing-badge {
         position: absolute;
-        top: 18px; 
+        top: 18px;
         right: -8px;
         background: linear-gradient(135deg, #ff6b6b, #ff8e53);
         color: white;
         padding: 6px 20px;
-        font-size: 0.8em; 
+        font-size: 0.8em;
         font-weight: 700;
         border-radius: 20px 0 0 20px;
         box-shadow: 0 4px 15px rgba(255,107,107,0.4);
         z-index: 10;
         letter-spacing: 0.5px;
         text-transform: uppercase;
-        animation: pulse 2s ease-in-out infinite;
+        animation: pulseBadge 2s ease-in-out infinite;
     }
 
-
-
-
-    @keyframes pulse {
+    @keyframes pulseBadge {
         0%, 100% {
             transform: scale(1);
         }
@@ -799,7 +754,6 @@
             box-shadow: 0 12px 35px rgba(0,184,169,0.5);
         }
 
-    /* MOBILE */
     @media (max-width: 768px) {
         .pricing-tables {
             grid-template-columns: 1fr;
@@ -831,7 +785,6 @@
         }
     }
 
-    /* FAQ */
     #faq {
         scroll-margin-top: 100px;
         max-width: 900px;
@@ -860,6 +813,7 @@
 
     .faq-container {
         position: relative;
+        counter-reset: faq-counter;
     }
 
     .faq-item {
@@ -871,6 +825,7 @@
         transition: all 0.3s ease;
         border: 2px solid transparent;
         position: relative;
+        counter-increment: faq-counter;
     }
 
         .faq-item::before {
@@ -999,11 +954,6 @@
         }
     }
 
-    /* Добавим счётчик вопросов */
-    .faq-item {
-        counter-increment: faq-counter;
-    }
-
     .faq-question::before {
         content: counter(faq-counter);
         position: absolute;
@@ -1029,11 +979,6 @@
         left: -50px;
     }
 
-    .faq-container {
-        counter-reset: faq-counter;
-    }
-
-    /* CTA в конце FAQ */
     .faq-cta {
         text-align: center;
         margin-top: 50px;
@@ -1074,7 +1019,6 @@
             box-shadow: 0 8px 25px rgba(0,123,255,0.3);
         }
 
-    /* MOBILE */
     @media (max-width: 768px) {
         .faq-section h2 {
             font-size: 2em;
@@ -1119,7 +1063,6 @@
         }
     }
 
-    /* CTA */
     .cta-section {
         text-align: center;
         background: linear-gradient(135deg, #00b8a9 0%, #007bff 100%);
@@ -1183,7 +1126,6 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
 
-    /* MOBILE OPTIMIZATIONS */
     @media (max-width: 968px) {
         section {
             margin: 60px 0;
@@ -1314,7 +1256,6 @@
         }
     }
 
-    /* Smooth animations */
     @media (prefers-reduced-motion: no-preference) {
         .service-card,
         .feature-item,
@@ -1341,30 +1282,22 @@
 
 {% block content %}
 <section class="hero">
-
-
-
     <div class="hero-content">
         <h1>Ваш надежный бухгалтер</h1>
         <p>
             Я помогаю предпринимателям и компаниям по всему Казахстану чувствовать уверенность в финансовых решениях.
             От налоговой отчётности до стратегического планирования — всё прозрачно, точно и вовремя.
         </p>
-
         <ul class="hero-points">
             <li>📊 Полное бухгалтерское сопровождение</li>
             <li>🧾 Налоговые консультации и отчётность</li>
             <li>💼 Оптимизация учёта и расходов</li>
         </ul>
-
         <p class="hero-contact">📞 +7 (701) 362-32-63 · 📧 bukh.df1@mail.ru · 📍 Актобе, Казахстан</p>
-
         <div class="hero-cta">
             <a href="/consultation" class="btn-hero btn-primary">Оставить заявку</a>
             <a href="#services" class="btn-hero btn-secondary">Услуги и цены</a>
-
         </div>
-
     </div>
 </section>
 
@@ -1392,7 +1325,6 @@
         <h2>Наши услуги</h2>
         <p>Комплексное бухгалтерское сопровождение для малого и среднего бизнеса — от учёта до оптимизации налогов</p>
     </div>
-
     <div class="services-grid">
         {% for key, service in services.items() %}
         <div class="service-card">
@@ -1400,17 +1332,16 @@
 
             {% set price = service.price_range|lower %}
             <div class="price">
-                {% if price %}
-                {% if 'от' in price or 'мес' in price %}
-                {{ service.price_range }}
+                {% if service.price %}
+                {% if 'от' in service.price or 'мес' in service.price %}
+                {{ service.price }}
                 {% else %}
-                от {{ service.price_range }} / мес
+                от {{ service.price }} / мес
                 {% endif %}
                 {% else %}
                 Цена по запросу
                 {% endif %}
             </div>
-
             <div class="short-benefit">
                 {% if key == 'bookkeeping' %}
                 Полное ведение учёта, отчётности и налогов — без головной боли.
@@ -1426,9 +1357,7 @@
                 Расчёт зарплаты, взносов и налогов с соблюдением всех норм.
                 {% endif %}
             </div>
-
             <div class="description">{{ service.description }}</div>
-
             <ul class="service-list">
                 {% if key == 'bookkeeping' %}
                 <li>Учёт операций</li>
@@ -1456,12 +1385,10 @@
                 <li>Конфиденциальность данных</li>
                 {% endif %}
             </ul>
-
             <div class="price-note">Индивидуальный расчёт — бесплатно</div>
         </div>
         {% endfor %}
     </div>
-
     <div class="additional-services">
         <h3>Дополнительные услуги</h3>
         <p>Поможем в сложных и нестандартных ситуациях:</p>
@@ -1477,7 +1404,6 @@
         <p>*Стоимость зависит от объёма операций и формы бизнеса. Индивидуальный расчёт — бесплатно и без обязательств.</p>
     </div>
 </section>
-
 
 <section class="features">
     <h2>Почему выбирают нас</h2>
@@ -1514,7 +1440,6 @@
         </div>
     </div>
 </section>
-
 
 <section id="pricing" class="pricing">
     <div class="section-header">
@@ -1661,14 +1586,12 @@
 </section>
 
 <script>
-    // FAQ Toggle
     document.querySelectorAll('.faq-question').forEach(q => {
         q.addEventListener('click', () => {
             const item = q.closest('.faq-item');
             const answer = q.nextElementSibling;
             const isActive = item.classList.contains('active');
 
-            // Close all other items
             document.querySelectorAll('.faq-item').forEach(otherItem => {
                 if (otherItem !== item) {
                     otherItem.classList.remove('active');
@@ -1676,7 +1599,6 @@
                 }
             });
 
-            // Toggle current item
             if (isActive) {
                 item.classList.remove('active');
                 answer.classList.remove('active');
@@ -1687,7 +1609,6 @@
         });
     });
 
-    // Keyboard navigation
     document.querySelectorAll('.faq-question').forEach((q, index, questions) => {
         q.setAttribute('tabindex', '0');
         q.addEventListener('keydown', (e) => {
@@ -1706,7 +1627,6 @@
         });
     });
 
-    // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
@@ -1725,7 +1645,6 @@
         });
     });
 
-    // Add animation on scroll
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -100px 0px'
@@ -1740,7 +1659,6 @@
         });
     }, observerOptions);
 
-    // Observe elements with animation
     document.querySelectorAll('.service-card, .feature-item, .pricing-card, .stat-item').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';

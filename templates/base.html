@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Бухгалтерские услуги{% endblock %}</title>
-
+    <meta name="description" content="{% block description %}Профессиональные бухгалтерские услуги в Актобе. Бухгалтерское сопровождение, налоговая отчётность, регистрация бизнеса. Опыт 20+ лет.{% endblock %}">
+    <meta name="keywords" content="бухгалтерские услуги, бухгалтер Актобе, налоговая отчётность, регистрация ИП, бухгалтерское сопровождение">
     <link rel="icon" href="{{ url_for('favicon') }}" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -102,7 +103,6 @@
             padding: 8px;
         }
 
-        /* CONTAINER */
         .container {
             max-width: 1200px;
             margin: 40px auto;
@@ -110,7 +110,6 @@
             flex: 1;
         }
 
-        /* ALERTS */
         .alert {
             padding: 16px 24px;
             border-left: 4px solid;
@@ -131,7 +130,6 @@
             border-color: #dc3545;
         }
 
-        /* FOOTER */
         footer {
             background: var(--footer-bg);
             color: var(--footer-text);
@@ -230,7 +228,6 @@
                 margin: 0;
             }
 
-        /* MOBILE */
         @media (max-width: 968px) {
             .footer-content {
                 grid-template-columns: 1fr 1fr;
@@ -259,7 +256,6 @@
                 padding: 14px 20px;
             }
 
-            /* 🔹 Улучшенное мобильное меню */
             .nav-menu {
                 display: none;
                 position: absolute;
@@ -342,7 +338,6 @@
             }
         }
 
-        /* Smooth transitions */
         @media (hover: hover) {
             nav a:hover,
             .footer-section a:hover {
@@ -350,7 +345,6 @@
             }
         }
 
-        /* Accessibility */
         a:focus,
         button:focus {
             outline: 2px solid var(--primary);
@@ -367,7 +361,6 @@
             <button class="mobile-menu-btn" onclick="toggleMenu()" aria-label="Меню">☰</button>
 
             <div class="nav-menu">
-                <!-- 🔹 объединяем левую и правую навигацию -->
                 <a href="/" class="{% if request.path == '/' %}active{% endif %}">Главная</a>
                 <a href="/consultation" class="{% if request.path.startswith('/consultation') %}active{% endif %}">Заявка</a>
 
@@ -449,7 +442,6 @@
             document.querySelector('.nav-menu').classList.toggle('active');
         }
 
-        // Закрытие при клике вне меню
         document.addEventListener('click', function (e) {
             const navMenu = document.querySelector('.nav-menu');
             const btn = document.querySelector('.mobile-menu-btn');
@@ -458,7 +450,6 @@
             }
         });
 
-        // Smooth scroll для якорных ссылок
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 const href = this.getAttribute('href');
