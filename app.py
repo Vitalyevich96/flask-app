@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory, Response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory, Response, abort
 import json
 import os
 import csv
@@ -773,6 +773,27 @@ def setup_telegram_webhook():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                              'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+@app.route('/test/404')
+def test_404():
+    """Тестовая страница 404 ошибки"""
+    return render_template('404.html'), 404
+
+@app.route('/test/500')
+def test_500():
+    """Тестовая страница 500 ошибки"""
+    return render_template('500.html'), 500
+
+@app.route('/test/trigger-404')
+def trigger_404():
+    """Вызвать реальную 404 ошибку"""
+    abort(404)
+
+@app.route('/test/trigger-500')
+def trigger_500():
+    """Вызвать реальную 500 ошибку"""
+    abort(500)
 
 @app.errorhandler(404)
 def not_found_error(error):
