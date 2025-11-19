@@ -178,16 +178,18 @@ def load_telegram_chats():
     """Загрузить список chat_id с включенными уведомлениями из базы данных"""
     max_retries = 3
     for attempt in range(max_retries):
-        conn = get_db_connection()
-        if not conn:
-            print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
-            if attempt < max_retries - 1:
-                time.sleep(1)
-            continue
-            
+        conn = None
         try:
+            conn = get_db_connection()
+            if not conn:
+                print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
+                if attempt < max_retries - 1:
+                    time.sleep(1)
+                continue
+            
             cur = conn.cursor()
             
+            # Проверить существует ли таблица
             cur.execute("""
                 SELECT EXISTS (
                     SELECT FROM information_schema.tables 
@@ -198,20 +200,28 @@ def load_telegram_chats():
             
             if not table_exists:
                 print("❌ Таблица telegram_chats не существует")
+                cur.close()
                 return []
             
             cur.execute('SELECT chat_id FROM telegram_chats WHERE notification_enabled = TRUE')
-            chats = [row[0] for row in cur.fetchall()]
+            chats = [int(row[0]) for row in cur.fetchall()]
+            cur.close()
+            
             print(f"📊 Загружено {len(chats)} пользователей с включенными уведомлениями")
             return chats
             
         except Exception as e:
-            print(f"❌ Ошибка загрузки Telegram чатов (попытка {attempt + 1}): {e}")
+            print(f"❌ Ошибка загрузки Telegram чатов (попытка {attempt + 1}): {type(e).__name__}: {e}")
+            import traceback
+            print(traceback.format_exc())
             if attempt < max_retries - 1:
                 time.sleep(1)
         finally:
             if conn:
-                conn.close()
+                try:
+                    conn.close()
+                except:
+                    pass
     
     return []
 
@@ -219,16 +229,18 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
     """Сохранить или обновить chat_id в базе данных"""
     max_retries = 3
     for attempt in range(max_retries):
-        conn = get_db_connection()
-        if not conn:
-            print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
-            if attempt < max_retries - 1:
-                time.sleep(1)
-            continue
-            
+        conn = None
         try:
+            conn = get_db_connection()
+            if not conn:
+                print(f"❌ Попытка {attempt + 1}: Нет подключения к базе")
+                if attempt < max_retries - 1:
+                    time.sleep(1)
+                continue
+            
             cur = conn.cursor()
             
+            # Создать таблицу если не существует
             cur.execute('''
                 CREATE TABLE IF NOT EXISTS telegram_chats (
                     id SERIAL PRIMARY KEY,
@@ -239,29 +251,48 @@ def save_telegram_chat(chat_id, username=None, first_name=None):
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
+            conn.commit()
             
-            cur.execute('''
-                INSERT INTO telegram_chats (chat_id, username, first_name, notification_enabled) 
-                VALUES (%s, %s, %s, TRUE) 
-                ON CONFLICT (chat_id) 
-                DO UPDATE SET 
-                    username = EXCLUDED.username, 
-                    first_name = EXCLUDED.first_name,
-                    notification_enabled = TRUE,
-                    created_at = CURRENT_TIMESTAMP
-            ''', (chat_id, username, first_name))
+            # Преобразовать chat_id в integer явно
+            chat_id_int = int(chat_id)
+            
+            # Проверить существует ли запись
+            cur.execute('SELECT id FROM telegram_chats WHERE chat_id = %s', (chat_id_int,))
+            existing = cur.fetchone()
+            
+            if existing:
+                # Обновить существующую запись
+                cur.execute('''
+                    UPDATE telegram_chats 
+                    SET username = %s, 
+                        first_name = %s,
+                        notification_enabled = TRUE
+                    WHERE chat_id = %s
+                ''', (username, first_name, chat_id_int))
+            else:
+                # Вставить новую запись
+                cur.execute('''
+                    INSERT INTO telegram_chats (chat_id, username, first_name, notification_enabled) 
+                    VALUES (%s, %s, %s, TRUE)
+                ''', (chat_id_int, username, first_name))
             
             conn.commit()
+            cur.close()
             print(f"✅ Пользователь добавлен/обновлен: {chat_id} (@{username})")
             return True
             
         except Exception as e:
-            print(f"❌ Ошибка сохранения Telegram чата (попытка {attempt + 1}): {e}")
+            print(f"❌ Ошибка сохранения Telegram чата (попытка {attempt + 1}): {type(e).__name__}: {e}")
+            import traceback
+            print(traceback.format_exc())
             if attempt < max_retries - 1:
                 time.sleep(1)
         finally:
             if conn:
-                conn.close()
+                try:
+                    conn.close()
+                except:
+                    pass
     
     return False
 
@@ -337,22 +368,36 @@ def send_telegram_notification(request_data):
 
 def disable_telegram_notifications(chat_id):
     """Установить статус 0 для пользователя"""
-    conn = get_db_connection()
-    if not conn:
-        return False
-        
+    conn = None
     try:
+        conn = get_db_connection()
+        if not conn:
+            print("❌ Ошибка подключения в disable_telegram_notifications")
+            return False
+        
         cur = conn.cursor()
-        cur.execute('UPDATE telegram_chats SET notification_enabled = FALSE WHERE chat_id = %s', (chat_id,))
+        
+        # Преобразовать chat_id в integer явно
+        chat_id_int = int(chat_id)
+        
+        cur.execute('UPDATE telegram_chats SET notification_enabled = FALSE WHERE chat_id = %s', (chat_id_int,))
         conn.commit()
+        cur.close()
+        
         print(f"✅ Уведомления отключены для пользователя: {chat_id} (статус: 0)")
         return True
+        
     except Exception as e:
-        print(f"❌ Ошибка отключения уведомлений: {e}")
+        print(f"❌ Ошибка отключения уведомлений: {type(e).__name__}: {e}")
+        import traceback
+        print(traceback.format_exc())
         return False
     finally:
         if conn:
-            conn.close()
+            try:
+                conn.close()
+            except:
+                pass
 
 def get_stats_message():
     """Получить статистику для отправки в Telegram"""
@@ -585,13 +630,16 @@ def login_required(f):
 
 def get_user_status_message(chat_id):
     """Получить текстовое сообщение о статусе пользователя"""
-    conn = get_db_connection()
-    if not conn:
-        return "❓ Неизвестно (ошибка подключения к базе)"
-        
+    conn = None
     try:
+        conn = get_db_connection()
+        if not conn:
+            print("❌ Ошибка подключения к базе в get_user_status_message")
+            return "❓ Неизвестно (ошибка подключения к базе)"
+        
         cur = conn.cursor()
         
+        # Проверить существует ли таблица
         cur.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
@@ -601,10 +649,17 @@ def get_user_status_message(chat_id):
         table_exists = cur.fetchone()[0]
         
         if not table_exists:
+            print("❌ Таблица telegram_chats не существует")
             return "❓ Таблица не существует (отправьте /start)"
         
-        cur.execute('SELECT notification_enabled FROM telegram_chats WHERE chat_id = %s', (chat_id,))
+        # Преобразовать chat_id в integer явно
+        chat_id_int = int(chat_id)
+        
+        # Получить статус пользователя
+        cur.execute('SELECT notification_enabled FROM telegram_chats WHERE chat_id = %s', (chat_id_int,))
         result = cur.fetchone()
+        
+        cur.close()
         
         if result:
             status = result[0]
@@ -613,11 +668,16 @@ def get_user_status_message(chat_id):
             return "❓ Не зарегистрирован (отправьте /start)"
             
     except Exception as e:
-        print(f"❌ Ошибка получения статуса пользователя: {e}")
+        print(f"❌ Ошибка получения статуса пользователя: {type(e).__name__}: {e}")
+        import traceback
+        print(traceback.format_exc())
         return "❓ Ошибка получения статуса"
     finally:
         if conn:
-            conn.close()
+            try:
+                conn.close()
+            except:
+                pass
 
 with app.app_context():
     print("🔄 Настраиваю Telegram вебхук при запуске...")
@@ -875,6 +935,48 @@ def api_stats():
     }
     
     return jsonify(stats)
+
+@app.route('/admin/test-db')
+@login_required
+def test_database():
+    """Тестирование подключения к базе данных"""
+    results = []
+    
+    # Тест подключения
+    conn = get_db_connection()
+    if conn:
+        results.append("✅ Подключение к БД успешно")
+        try:
+            cur = conn.cursor()
+            
+            # Проверить таблицы
+            cur.execute("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public'
+            """)
+            tables = [row[0] for row in cur.fetchall()]
+            results.append(f"📋 Таблицы: {', '.join(tables)}")
+            
+            # Проверить telegram_chats
+            if 'telegram_chats' in tables:
+                cur.execute('SELECT COUNT(*) FROM telegram_chats')
+                count = cur.fetchone()[0]
+                results.append(f"👥 Записей в telegram_chats: {count}")
+                
+                cur.execute('SELECT chat_id, username, notification_enabled FROM telegram_chats LIMIT 5')
+                for row in cur.fetchall():
+                    results.append(f"  - Chat ID: {row[0]}, Username: {row[1]}, Enabled: {row[2]}")
+            
+            cur.close()
+        except Exception as e:
+            results.append(f"❌ Ошибка: {e}")
+        finally:
+            conn.close()
+    else:
+        results.append("❌ Не удалось подключиться к БД")
+    
+    return "<br>".join(results)
 
 @app.route('/admin/init-db')
 @login_required
